@@ -1,59 +1,37 @@
-<script>
-	import Counter from './Counter.svelte';
-	import welcome from '$lib/images/svelte-welcome.webp';
-	import welcome_fallback from '$lib/images/svelte-welcome.png';
+<script lang="ts">
+	/// <reference types="web-bluetooth" />
+	const serviceUUID = 'a3941db0-a97c-4cf1-943f-a25ff9ba40cd';
+	const ledCharacteristicUUID = '5b8c0ab6-a058-4684-b2b6-4a0a692e2d45';
+
+	let bleDevice: BluetoothDevice;
+	let bleServer: BluetoothRemoteGATTServer;
+	let ledService: BluetoothRemoteGATTService;
+	let ledCharacteristic: BluetoothRemoteGATTCharacteristic;
+
+	async function connectToBLE() {
+		bleDevice = await navigator.bluetooth.requestDevice({
+			filters: [{ namePrefix: 'nrf52' }],
+			optionalServices: [serviceUUID]
+		});
+		if (!bleDevice.gatt) throw new Error('No GATT server');
+
+		bleServer = await bleDevice.gatt?.connect();
+		ledService = await bleServer?.getPrimaryService(serviceUUID);
+		ledCharacteristic = await ledService.getCharacteristic(ledCharacteristicUUID);
+	}
 </script>
 
 <svelte:head>
-	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
+	<title>Control</title>
+	<meta name="description" content="Control app" />
+	<ul>
+		<li>Led: {ledCharacteristic.readValue()}</li>
+	</ul>
 </svelte:head>
 
 <section>
-	<h1>
-		<span class="welcome">
-			<picture>
-				<source srcset={welcome} type="image/webp" />
-				<img src={welcome_fallback} alt="Welcome" />
-			</picture>
-		</span>
-
-		to your new<br />SvelteKit app
-	</h1>
-
-	<h2>
-		try editing <strong>src/routes/+page.svelte</strong>
-	</h2>
-
-	<Counter />
+	<button on:click={() => connectToBLE()}>Connect To Ble</button>
 </section>
 
 <style>
-	section {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		flex: 0.6;
-	}
-
-	h1 {
-		width: 100%;
-	}
-
-	.welcome {
-		display: block;
-		position: relative;
-		width: 100%;
-		height: 0;
-		padding: 0 0 calc(100% * 495 / 2048) 0;
-	}
-
-	.welcome img {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-		top: 0;
-		display: block;
-	}
 </style>
