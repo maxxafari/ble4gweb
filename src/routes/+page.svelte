@@ -4,7 +4,10 @@
 	const ledCharacteristicUUID = '5b8c0ab6-a058-4684-b2b6-4a0a692e2d45';
 
 	async function getVal(gc: BluetoothRemoteGATTCharacteristic) {
-		const dataView = await gc.readValue();
+		return await parseVal(await gc.readValue());
+	}
+
+	async function parseVal(dataView: DataView) {
 		const valueArray = new Uint8Array(dataView.buffer); // The Uint8Array typed array represents an array of 8-bit unsigned integers.
 		console.log('valueArray', valueArray);
 
@@ -39,6 +42,13 @@
 		console.log('found ledCharacteristic', ledCharacteristic);
 
 		ledValue = await getVal(ledCharacteristic);
+		/* 		// does not send new values on update
+		ledCharacteristic.addEventListener('characteristicvaluechanged', async (event) => {
+			const target = event.target as BluetoothRemoteGATTCharacteristic;
+			console.log('characteristicvaluechanged', target.value);
+			if (!target.value) return;
+			ledValue = await parseVal(target.value);
+		}); */
 	}
 	async function disconnectBLE() {
 		await bleDevice?.gatt?.disconnect();
@@ -48,6 +58,11 @@
 	async function getLed() {
 		if (!ledCharacteristic) return;
 		ledValue = await getVal(ledCharacteristic);
+	}
+	async function setLed(blue: number, red: number) {
+		if (!ledCharacteristic) return;
+		await ledCharacteristic.writeValue(new Uint8Array([blue, red]));
+		getLed();
 	}
 </script>
 
@@ -67,8 +82,8 @@
 		<li><button on:click={() => getLed()}> update</button></li>
 		<li>Led: {ledValue}</li>
 	</ul>
-	<button on:click={() => ledCharacteristic?.writeValue(new Uint8Array([0, 0]))}> Off </button>
-	<button on:click={() => ledCharacteristic?.writeValue(new Uint8Array([1, 1]))}> On </button>
+	<button on:click={() => setLed(0, 0)}> Off </button>
+	<button on:click={() => setLed(1, 1)}> On </button>
 </section>
 
 <style>
