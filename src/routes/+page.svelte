@@ -5,15 +5,10 @@
 
 	async function getVal(gc: BluetoothRemoteGATTCharacteristic) {
 		const dataView = await gc.readValue();
-		const valueArray = new Uint8Array(dataView.buffer);
+		const valueArray = new Uint8Array(dataView.buffer); // The Uint8Array typed array represents an array of 8-bit unsigned integers.
 		console.log('valueArray', valueArray);
 
-		console.log(
-			'Connected using Async function!\n The value is: \nQ1=' +
-				valueArray[1] +
-				' Q0=' +
-				valueArray[0]
-		);
+		// is there a simpler way to cast this to a number array?
 		return [valueArray[0], valueArray[1]];
 	}
 
