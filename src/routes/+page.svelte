@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { createBLEService } from '$lib/BLEService';
+
 	/// <reference types="web-bluetooth" />
 	const serviceUUID = 'a3941db0-a97c-4cf1-943f-a25ff9ba40cd';
 	const ledCharacteristicUUID = '5b8c0ab6-a058-4684-b2b6-4a0a692e2d45';
@@ -22,14 +24,14 @@
 	let ledCharacteristic: BluetoothRemoteGATTCharacteristic | undefined;
 
 	let ledValue: number[];
-
+	let batteryLevel: string;
 	// reactive
 	$: connected = !!bleDevice;
 
 	async function connectToBLE() {
 		bleDevice = await navigator.bluetooth.requestDevice({
 			filters: [{ namePrefix: 'nrf52' }],
-			optionalServices: [serviceUUID]
+			optionalServices: [serviceUUID, 'battery_service']
 		});
 		if (!bleDevice.gatt) throw new Error('No GATT server');
 
@@ -41,14 +43,20 @@
 		if (!ledCharacteristic) throw new Error('No LED characteristic');
 		console.log('found ledCharacteristic', ledCharacteristic);
 
+		console.log('add battery value');
+		const battery = await createBLEService<string>(bleServer, {
+			serviceId: 'battery_service',
+			characteristicId: 'battery_level',
+			isNotifiable: true,
+			readParser: (dataView: DataView) => dataView.getUint8(0).toString()
+		});
+
+		battery.onNotification((value) => {
+			console.log('battery value', value);
+			batteryLevel = value;
+		});
+
 		ledValue = await getVal(ledCharacteristic);
-		/* 		// does not send new values on update
-		ledCharacteristic.addEventListener('characteristicvaluechanged', async (event) => {
-			const target = event.target as BluetoothRemoteGATTCharacteristic;
-			console.log('characteristicvaluechanged', target.value);
-			if (!target.value) return;
-			ledValue = await parseVal(target.value);
-		}); */
 	}
 	async function disconnectBLE() {
 		await bleDevice?.gatt?.disconnect();
@@ -81,6 +89,7 @@
 	<ul>
 		<li><button on:click={() => getLed()}> update</button></li>
 		<li>Led: {ledValue}</li>
+		<li>Battery: {batteryLevel}</li>
 	</ul>
 	<button on:click={() => setLed(0, 0)}> Off </button>
 	<button on:click={() => setLed(1, 1)}> On </button>
