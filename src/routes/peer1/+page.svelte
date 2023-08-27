@@ -2,11 +2,16 @@
 	import Peer from 'simple-peer';
 	let initiator = location.hash === '#1';
 	let peer: Peer.Instance | null = null;
-	onload = async () => {
+
+	const load = async () => {
+		console.log('onload...');
+
 		const response = await fetch(
 			'https://maxxafari.metered.live/api/v1/turn/credentials?apiKey=3aea09a742976f93e50ffe3a1c7a287fc050'
 		);
 		const iceServers = await response.json();
+		console.log('iceServers', iceServers);
+
 		peer = new Peer({
 			initiator,
 			trickle: false,
@@ -14,6 +19,9 @@
 				iceServers
 			}
 		});
+
+		window.peer = peer;
+
 		peer.on('error', (err) => console.log('error', err));
 
 		peer.on('signal', (data) => {
@@ -31,6 +39,7 @@
 			data.push(data);
 		});
 	};
+	load();
 
 	let textContent = '';
 	let incoming = '';
@@ -41,7 +50,7 @@
 
 <div>
 	<p>initiator: {initiator ? 'true' : 'false'}</p>
-	<h4>signal</h4>
+	<h4>signal peer1</h4>
 	<pre>{signal}</pre>
 	<div>
 		<h4>Incomping</h4>
