@@ -1,9 +1,12 @@
 # TODO
 
-- Make sattic
-- release to githubpages
-- implement web-rtc
+- Make static ✅
+- release to githubpages ✅
+- implement web-rtc 🔥
   - create BLE mobile page
   - create web control page
 - send commands from web to mobile to bt
 - send video from mobile to web
+
+try free TURN server from https://xirsys.com/ (100 connections per day)
+or https://dev.to/aprogrammer22/list-of-free-stun-and-turn-servers-open-relay-project-3a70
