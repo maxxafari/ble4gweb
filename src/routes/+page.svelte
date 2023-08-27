@@ -48,7 +48,7 @@
 			serviceId: 'battery_service',
 			characteristicId: 'battery_level',
 			isNotifiable: true,
-			readParser: (dataView: DataView) => dataView.getUint8(0).toString()
+			readParser: (dataView) => dataView.getUint8(0).toString()
 		});
 
 		battery.onNotification((value) => {
