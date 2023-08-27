@@ -2,7 +2,11 @@
 
 - Make static ✅
 - release to githubpages ✅
+- create BLE mobile page ✅
 - implement web-rtc 🔥
+  - crete test web-rtc page
+    - receiver
+    - transmitter
   - create BLE mobile page
   - create web control page
 - send commands from web to mobile to bt
