@@ -4,6 +4,9 @@
 	let peer: Peer.Instance | null = null;
 
 	let offer = '';
+	let connected = false;
+	let send = '';
+	let data: string[] = [];
 
 	const load = async () => {
 		console.log('onload...');
@@ -33,11 +36,27 @@
 
 		peer.on('connect', () => {
 			console.log('CONNECT');
+			connected = true;
 			peer?.send('whatever' + new Date().toISOString());
 		});
 
-		peer.on('data', (data) => {
-			console.log('GOT data:', data);
+		peer.on('close', () => {
+			console.log('CLOSE');
+			connected = false;
+		});
+		peer.on('error', (err) => {
+			console.error('error', err);
+			connected = false;
+		});
+
+		peer.on('data', (d) => {
+			console.log('GOT data:', d);
+			try {
+				data.push(d.toString());
+			} catch (e) {
+				console.error('could not parse data to string :/', d);
+			}
+			window.data = data;
 		});
 	};
 	load();
@@ -50,8 +69,6 @@
 	let textContent = '';
 	let incoming = '';
 	let signal = '';
-
-	let data: string[] = [];
 </script>
 
 <div>
@@ -64,7 +81,15 @@
 		<br />
 		<button on:click={() => signalWithResponse()}>Signal</button>
 	</div>
-
+	<div>
+		<textarea id="send" bind:value={send} />
+		<button
+			on:click={() => {
+				peer?.send(send);
+				send = '';
+			}}>Send</button
+		>
+	</div>
 	<div>
 		<h3>data</h3>
 		<ul>
