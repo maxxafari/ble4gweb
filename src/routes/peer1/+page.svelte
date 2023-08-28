@@ -53,6 +53,7 @@
 			console.log('GOT data:', d);
 			try {
 				data.push(d.toString());
+				data = data;
 			} catch (e) {
 				console.error('could not parse data to string :/', d);
 			}
