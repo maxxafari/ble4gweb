@@ -75,29 +75,37 @@
 	<p>initiator: {initiator ? 'true' : 'false'}</p>
 	<h4>My signal</h4>
 	<pre>{signal}</pre>
-	<div>
-		<h4>Signal with data</h4>
-		<textarea id="incoming" bind:value={offer} />
-		<br />
-		<button on:click={() => signalWithResponse()}>Signal</button>
-	</div>
-	<div>
-		<textarea id="send" bind:value={send} />
-		<button
-			on:click={() => {
-				peer?.send(send);
-				send = '';
-			}}>Send</button
-		>
-	</div>
-	<div>
-		<h3>data</h3>
-		<ul>
-			{#each data as d}
-				<li>{d}</li>
-			{/each}
-		</ul>
-	</div>
+	{#if !connected}
+		<div>
+			<h4>Signal with data</h4>
+			<textarea id="incoming" bind:value={offer} />
+			<br />
+			<button on:click={() => signalWithResponse()}>Signal</button>
+		</div>
+	{/if}
+	{#if connected}
+		<div>
+			<h4>Connected</h4>
+			<p>connected: {connected ? 'true' : 'false'}</p>
+		</div>
+		<div>
+			<textarea id="send" bind:value={send} />
+			<button
+				on:click={() => {
+					peer?.send(send);
+					send = '';
+				}}>Send</button
+			>
+		</div>
+		<div>
+			<h3>data</h3>
+			<ul>
+				{#each data as d}
+					<li>{d}</li>
+				{/each}
+			</ul>
+		</div>
+	{/if}
 </div>
 
 <style>
