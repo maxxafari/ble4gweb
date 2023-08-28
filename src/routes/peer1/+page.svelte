@@ -3,6 +3,8 @@
 	let initiator = location.hash === '#1';
 	let peer: Peer.Instance | null = null;
 
+	let offer = '';
+
 	const load = async () => {
 		console.log('onload...');
 
@@ -41,6 +43,11 @@
 	};
 	load();
 
+	function signalWithResponse() {
+		console.log('SUBMIT!: ', JSON.parse(offer));
+		peer?.signal(JSON.parse(offer));
+	}
+
 	let textContent = '';
 	let incoming = '';
 	let signal = '';
@@ -50,13 +57,15 @@
 
 <div>
 	<p>initiator: {initiator ? 'true' : 'false'}</p>
-	<h4>signal peer1</h4>
+	<h4>My signal</h4>
 	<pre>{signal}</pre>
 	<div>
-		<h4>Incomping</h4>
-		<textarea id="incoming" bind:value={incoming} />
+		<h4>Signal with data</h4>
+		<textarea id="incoming" bind:value={offer} />
 		<br />
+		<button on:click={() => signalWithResponse()}>Signal</button>
 	</div>
+
 	<div>
 		<h3>data</h3>
 		<ul>
