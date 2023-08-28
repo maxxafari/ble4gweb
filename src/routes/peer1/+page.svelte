@@ -33,12 +33,11 @@
 
 		peer.on('connect', () => {
 			console.log('CONNECT');
-			peer?.send('whatever' + new Date().toISOString);
+			peer?.send('whatever' + new Date().toISOString());
 		});
 
 		peer.on('data', (data) => {
-			console.log('CONNECT');
-			data.push(data);
+			console.log('GOT data:', data);
 		});
 	};
 	load();
