@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { getIceServerList } from '$lib/iceServers';
-	import { CallPeer2 } from '$lib/signalServer';
+	import { AnswerCallFromPeer1, CallPeer2, WaitForCallFromPeer1 } from '$lib/signalServer';
 	import Peer, { type SignalData } from 'simple-peer';
-	let initiator = true;
-	let peer1: Peer.Instance | null = null;
+	let initiator = false;
+	let peer2: Peer.Instance | null = null;
 
-	let offer = '';
 	let connected = false;
 	let send = '';
 	let data: string[] = [];
@@ -14,39 +13,40 @@
 		console.log('onload...');
 		const iceServers = await getIceServerList();
 
-		peer1 = new Peer({
-			initiator,
+		peer2 = new Peer({
+			initiator, // false
 			trickle: false,
 			config: {
 				iceServers
 			}
 		});
 
-		peer1.on('error', (err) => console.log('error', err));
+		peer2.on('error', (err) => console.log('error', err));
 
-		peer1.on('signal', async (data: SignalData) => {
-			// when we have a call from peer2, we open the connection
-			const answer = await CallPeer2(data);
-			peer1?.signal(answer);
+		// this will not trigger until we call peer2.signal(answer)
+		peer2.on('signal', async (data: SignalData) => {
+			// wen we have a call and have created an answer we send it back to peer1
+			console.info('answering call from peer1', data);
+			AnswerCallFromPeer1(data);
 			// now we should get a connection
 		});
 
-		peer1.on('connect', () => {
+		peer2.on('connect', () => {
 			console.log('CONNECT');
 			connected = true;
-			peer1?.send('whatever' + new Date().toISOString());
+			peer2?.send('whatever' + new Date().toISOString());
 		});
 
-		peer1.on('close', () => {
+		peer2.on('close', () => {
 			console.log('CLOSE');
 			connected = false;
 		});
-		peer1.on('error', (err: any) => {
+		peer2.on('error', (err: any) => {
 			console.error('error', err);
 			connected = false;
 		});
 
-		peer1.on('data', (d: any) => {
+		peer2.on('data', (d: any) => {
 			console.log('GOT data:', d);
 			try {
 				data.push(d.toString());
@@ -58,13 +58,24 @@
 		});
 	};
 	load();
+	async function waitForCall() {
+		try {
+			const answer = await WaitForCallFromPeer1();
+			peer2?.signal(answer);
+		} catch (e) {
+			console.error('Did not get a call from peer1', e);
+			console.info('Waiting for call again...');
+			waitForCall();
+		}
+	}
+	waitForCall();
 </script>
 
 <div>
-	<p>Caller (initiator)</p>
+	<p>Waiting for call (NOT initiator)</p>
 	{#if !connected}
 		<div>
-			<h4>Calling peer2</h4>
+			<h4>Waiting for call from peer1</h4>
 		</div>
 	{/if}
 	{#if connected}
@@ -76,7 +87,7 @@
 			<textarea id="send" bind:value={send} />
 			<button
 				on:click={() => {
-					peer1?.send(send);
+					peer2?.send(send);
 					send = '';
 				}}>Send</button
 			>
