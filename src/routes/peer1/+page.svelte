@@ -26,6 +26,7 @@
 
 		peer1.on('signal', async (data: SignalData) => {
 			// when we have a call from peer2, we open the connection
+			console.info('Got my signal object form ice server');
 			const answer = await CallPeer2(data);
 			peer1?.signal(answer);
 			// now we should get a connection

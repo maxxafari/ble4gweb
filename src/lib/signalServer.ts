@@ -12,15 +12,17 @@ const caller: User = {
 	pass: 'not-a-secret-at-all'
 };
 const responder: User = {
-	username: 'web-ble-control-responder',
-	pass: 'not-a-secret-at-all-also'
+	username: 'responder3',
+	pass: 'notasecretatallalso3'
 };
 
 async function receive(username: string, password: string): Promise<SignalData> {
-	const response = await fetch(`${signalServer}/inbox`, {
+	const headers = new Headers();
+	headers.set('Authorization', 'Basic ' + btoa(username + ':' + password));
+	const response = await fetch(`${signalServer}`, {
+		headers,
 		method: 'GET',
-		cache: 'no-cache',
-		headers: new Headers({ Authorization: 'Basic ' + window.btoa(username + ':' + password) })
+		cache: 'no-cache'
 	});
 
 	try {
@@ -33,8 +35,9 @@ async function receive(username: string, password: string): Promise<SignalData> 
 }
 
 async function signalSend(from: string, password: string, to: string, data: SignalData) {
-	const response = await fetch(`${signalServer}/inbox?to=${to}`, {
+	const response = await fetch(`${signalServer}?to=${to}`, {
 		method: 'POST',
+		mode: 'no-cors',
 		cache: 'no-cache',
 		headers: new Headers({ Authorization: 'Basic ' + window.btoa(from + ':' + password) }),
 		body: JSON.stringify(data)

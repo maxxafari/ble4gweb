@@ -65,7 +65,7 @@
 		} catch (e) {
 			console.error('Did not get a call from peer1', e);
 			console.info('Waiting for call again...');
-			waitForCall();
+			// waitForCall();
 		}
 	}
 	waitForCall();
