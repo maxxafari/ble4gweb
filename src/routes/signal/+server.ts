@@ -1,7 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { SignalData } from 'simple-peer';
 // import * as database from '$lib/server/database.js';
-
 interface SignalServerResponse {
 	offer: SignalData | '';
 	answer: SignalData | '';

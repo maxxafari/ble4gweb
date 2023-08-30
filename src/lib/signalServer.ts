@@ -22,16 +22,6 @@ async function receive(): Promise<SignalServerResponseRequest> {
 	}
 }
 
-function promiseAsObject() {
-	let resolve: (value: SignalServerResponseRequest) => void;
-	let reject: (value: any) => any;
-	const p = new Promise<SignalServerResponseRequest>((r, j) => {
-		resolve = (value) => r(value);
-		reject = (value) => j(value);
-		return { p, resolve, reject };
-	});
-}
-
 async function waitSeconds(seconds: number): Promise<void> {
 	return new Promise((resolve) => {
 		setTimeout(() => {
@@ -64,6 +54,7 @@ export const WaitForCallFromPeer1 = async (): Promise<SignalData> => {
 		await waitSeconds(2);
 		data = await receive();
 		console.info('Received message from signal server:', data);
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		if (data.offer && resolve!) resolve!(data.offer);
 	}
 	return p;
@@ -79,6 +70,7 @@ export const WaitForCallAnswerFromPeer2 = async (): Promise<SignalData> => {
 	while (!data.answer) {
 		await waitSeconds(2);
 		data = await receive();
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		if (data.answer && resolve!) resolve!(data.answer);
 		else console.info('No answer yet...', data);
 	}
