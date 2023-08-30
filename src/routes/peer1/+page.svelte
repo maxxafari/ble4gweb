@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getIceServerList } from '$lib/iceServers';
-	import { CallPeer2 } from '$lib/signalServer';
+	import { CallPeer2, WaitForCallAnswerFromPeer2 } from '$lib/signalServer';
 	import Peer, { type SignalData } from 'simple-peer';
 	let initiator = true;
 	let peer1: Peer.Instance | null = null;
@@ -27,8 +27,10 @@
 		peer1.on('signal', async (data: SignalData) => {
 			// when we have a call from peer2, we open the connection
 			console.info('Got my signal object form ice server');
-			const answer = await CallPeer2(data);
+			await CallPeer2(data);
+			const answer = await WaitForCallAnswerFromPeer2();
 			peer1?.signal(answer);
+
 			// now we should get a connection
 		});
 

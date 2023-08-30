@@ -1,26 +1,14 @@
 import type { SignalData } from 'simple-peer';
 
-const signalServer = 'https://connect.inboxgo.org/inbox';
+const signalServer = '/ble4gweb/signal';
 
-interface User {
-	username: string;
-	pass: string;
+interface SignalServerResponseRequest {
+	offer: SignalData | '';
+	answer: SignalData | '';
 }
 
-const caller: User = {
-	username: 'web-ble-control-caller',
-	pass: 'not-a-secret-at-all'
-};
-const responder: User = {
-	username: 'responder3',
-	pass: 'notasecretatallalso3'
-};
-
-async function receive(username: string, password: string): Promise<SignalData> {
-	const headers = new Headers();
-	headers.set('Authorization', 'Basic ' + btoa(username + ':' + password));
+async function receive(): Promise<SignalServerResponseRequest> {
 	const response = await fetch(`${signalServer}`, {
-		headers,
 		method: 'GET',
 		cache: 'no-cache'
 	});
@@ -34,37 +22,69 @@ async function receive(username: string, password: string): Promise<SignalData> 
 	}
 }
 
-async function signalSend(from: string, password: string, to: string, data: SignalData) {
-	const response = await fetch(`${signalServer}?to=${to}`, {
+function promiseAsObject() {
+	let resolve: (value: SignalServerResponseRequest) => void;
+	let reject: (value: any) => any;
+	const p = new Promise<SignalServerResponseRequest>((r, j) => {
+		resolve = (value) => r(value);
+		reject = (value) => j(value);
+		return { p, resolve, reject };
+	});
+}
+
+async function waitSeconds(seconds: number): Promise<void> {
+	return new Promise((resolve) => {
+		setTimeout(() => {
+			resolve();
+		}, seconds * 1000);
+	});
+}
+
+async function signalSend(data: SignalServerResponseRequest) {
+	const response = await fetch(`${signalServer}`, {
 		method: 'POST',
-		mode: 'no-cors',
 		cache: 'no-cache',
-		headers: new Headers({ Authorization: 'Basic ' + window.btoa(from + ':' + password) }),
 		body: JSON.stringify(data)
 	});
 	console.info('Sent message to signal server:', data);
 }
 
-export async function CallPeer2(offer: SignalData): Promise<SignalData> {
-	return new Promise((resolve, reject) => {
-		// create inbox first by calling receive
-		receive(caller.username, caller.pass)
-			.then((data: SignalData) => {
-				console.info('Received message from signal server:', data);
-				resolve(data);
-			})
-			.catch((e: Error) => {
-				reject(e);
-			});
-		// then send offer to responder
-		signalSend(caller.username, caller.pass, responder.username, offer);
-	});
+export async function CallPeer2(offer: SignalData): Promise<void> {
+	await signalSend({ offer, answer: '' });
 }
 
 export const WaitForCallFromPeer1 = async (): Promise<SignalData> => {
-	return await receive(responder.username, responder.pass);
+	let data: SignalServerResponseRequest = { offer: '', answer: '' };
+	let resolve: (value: SignalData) => void;
+	const p = new Promise<SignalData>((r) => {
+		resolve = (value) => r(value);
+	});
+
+	while (!data.offer) {
+		await waitSeconds(2);
+		data = await receive();
+		console.info('Received message from signal server:', data);
+		if (data.offer && resolve!) resolve!(data.offer);
+	}
+	return p;
+};
+
+export const WaitForCallAnswerFromPeer2 = async (): Promise<SignalData> => {
+	let data: SignalServerResponseRequest = { offer: '', answer: '' };
+	let resolve: (value: SignalData) => void;
+	const p = new Promise<SignalData>((r) => {
+		resolve = (value) => r(value);
+	});
+
+	while (!data.answer) {
+		await waitSeconds(2);
+		data = await receive();
+		if (data.answer && resolve!) resolve!(data.answer);
+		else console.info('No answer yet...', data);
+	}
+	return p;
 };
 
 export const AnswerCallFromPeer1 = async (answer: SignalData): Promise<void> => {
-	signalSend(responder.username, responder.pass, caller.username, answer);
+	return await signalSend({ offer: '', answer });
 };
