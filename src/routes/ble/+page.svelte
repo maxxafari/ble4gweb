@@ -17,7 +17,29 @@
 		readParser: (dataView) => dataView.getUint8(0).toString()
 	});
 
-	const ble = createBleDevice([battery]);
+	const servo = createBLEService<string>({
+		name: 'Servo',
+		serviceId: '847a27cd-ccf0-4f7e-8cb4-d5fe53df2d60',
+		characteristicId: '7c1b818b-dff0-4514-8bcf-f0ad8c79fad9',
+		isNotifiable: false,
+		readParser: (dataView) => dataView.getUint8(0).toString(),
+		setParser: (value: string) => {
+			const degrees: number = parseInt(value);
+			const bin = degrees.toString(2);
+			const buff = new ArrayBuffer([
+				bin[0],
+				bin[1],
+				bin[2],
+				bin[3],
+				bin[4],
+				bin[5],
+				bin[6],
+				bin[7]
+			]);
+			return buff;
+		}
+	});
+	const ble = createBleDevice([battery, servo]);
 
 	async function connectToBLE() {
 		await ble.connect();
@@ -58,6 +80,7 @@
 	<ul>
 		<li>Led: {ledValue}</li>
 		<li>Battery: {batteryLevel}</li>
+		<li><button on:click={() => servo?.setVal('100')}>servo</button></li>
 	</ul>
 </section>
 

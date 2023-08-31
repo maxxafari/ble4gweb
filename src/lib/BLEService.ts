@@ -55,7 +55,7 @@ export const createBLEService = <T>(options: BLEServiceOptions<T>): BLEService<T
 		if (!bleServer.connected) throw new Error('BLE Server not connected');
 		const service = await bleServer.getPrimaryService(serviceId);
 		characteristic = await service.getCharacteristic(characteristicId);
-
+		console.log('connected to: ', { name });
 		if (options.isNotifiable) {
 			await characteristic.startNotifications();
 			console.log('add notification for: ', options.characteristicId);
