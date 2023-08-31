@@ -1,4 +1,5 @@
 <script>
+	import { base } from '$app/paths';
 	import { page } from '$app/stores';
 </script>
 
@@ -13,7 +14,13 @@
 		</svg>
 		<ul>
 			<li aria-current={$page.url.pathname === '/' ? 'page' : undefined}>
-				<a href="/">BLE</a>
+				<a href="{base}/">BLE</a>
+			</li>
+			<li>
+				<a href="{base}/peer1">Peer1</a>
+			</li>
+			<li>
+				<a href="{base}/peer2">Peer2</a>
 			</li>
 		</ul>
 	</nav>

@@ -13,9 +13,9 @@ let database: SignalServerResponse = {
 export async function POST({ request, cookies }) {
 	const { offer, answer } = await request.json();
 
-	// const userid = cookies.get('userid');
-	if (offer) database = { ...database, offer };
-	if (answer) database = { ...database, answer };
+	// reset answer when creating new offer and vice versa
+	if (answer) database = { answer, offer: '' };
+	if (offer) database = { answer: '', offer };
 
 	return json({ done: true }, { status: 201 });
 }
