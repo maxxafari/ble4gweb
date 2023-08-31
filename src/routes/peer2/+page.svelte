@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getIceServerList } from '$lib/iceServers';
-	import { AnswerCallFromPeer1, CallPeer2, WaitForCallFromPeer1 } from '$lib/signalServer';
+	import { AnswerCallFromPeer1, WaitForCallFromPeer1 } from '$lib/signalServer';
 	import Peer, { type SignalData } from 'simple-peer';
 	let initiator = false;
 	let peer2: Peer.Instance | null = null;
@@ -8,6 +8,8 @@
 	let connected = false;
 	let send = '';
 	let data: string[] = [];
+	let video: HTMLVideoElement;
+	let stream: MediaStream | null = null;
 
 	const load = async () => {
 		console.log('onload...');
@@ -56,6 +58,10 @@
 			}
 			// window.data = data;
 		});
+		peer2.on('stream', (newStream) => {
+			console.log('got stream');
+			stream = newStream;
+		});
 	};
 	load();
 	async function waitForCall() {
@@ -69,11 +75,20 @@
 		}
 	}
 	waitForCall();
+	$: if (stream && video && video.srcObject !== stream) {
+		console.log('setting stream');
+		video.srcObject = stream;
+		video.play();
+	}
+	window.video = video;
 </script>
 
+<svelte:head>
+	<title>Peer2</title>
+</svelte:head>
 <div>
-	<p>Waiting for call (NOT initiator)</p>
 	{#if !connected}
+		<p>Waiting for call (NOT initiator)</p>
 		<div>
 			<h4>Waiting for call from peer1</h4>
 		</div>
@@ -100,12 +115,21 @@
 				{/each}
 			</ul>
 		</div>
+		<div class="video-container">
+			<!-- svelte-ignore a11y-media-has-caption -->
+			<video bind:this={video} autoplay muted />
+		</div>
 	{/if}
 </div>
 
 <style>
 	textarea {
 		width: 300px;
+		min-height: 200px;
+	}
+	video {
+		width: 100%;
+		max-width: 600px;
 		min-height: 200px;
 	}
 </style>

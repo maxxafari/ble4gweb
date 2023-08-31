@@ -15,7 +15,6 @@ async function receive(): Promise<SignalServerResponseRequest> {
 
 	try {
 		const data = await response.json();
-		console.info('Received message from signal server:', data);
 		return data;
 	} catch (e) {
 		throw new Error('Failed to receive message from signal server');
@@ -36,7 +35,6 @@ async function signalSend(data: SignalServerResponseRequest) {
 		cache: 'no-cache',
 		body: JSON.stringify(data)
 	});
-	console.info('Sent message to signal server:', data);
 }
 
 export async function CallPeer2(offer: SignalData): Promise<void> {

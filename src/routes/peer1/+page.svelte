@@ -13,9 +13,13 @@
 	const load = async () => {
 		console.log('onload...');
 		const iceServers = await getIceServerList();
-
+		const stream = await navigator.mediaDevices.getUserMedia({
+			video: true
+			//audio: true
+		});
 		peer1 = new Peer({
 			initiator,
+			stream,
 			trickle: false,
 			config: {
 				iceServers
@@ -63,6 +67,9 @@
 	load();
 </script>
 
+<svelte:head>
+	<title>Peer1</title>
+</svelte:head>
 <div>
 	<p>Caller (initiator)</p>
 	{#if !connected}
