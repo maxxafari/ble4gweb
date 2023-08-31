@@ -1,4 +1,6 @@
-interface BLEService<T> {
+interface BLEService<T = string | number> {
+	serviceId: string;
+	connect: (bleServer: BluetoothRemoteGATTServer) => Promise<void>;
 	getVal?: () => Promise<T>;
 	setValRaw?: (value: ArrayBuffer) => Promise<void>;
 	setVal?: (value: T) => Promise<void>;
@@ -6,6 +8,7 @@ interface BLEService<T> {
 }
 
 interface BLEServiceOptions<T> {
+	name: string;
 	serviceId: string;
 	characteristicId: string;
 
@@ -16,50 +19,59 @@ interface BLEServiceOptions<T> {
 	isReadable?: boolean;
 	isNotifiable?: boolean;
 }
-/*
-// interface BLEServiceOptions<T> extends BLEBaseOptionsServiceOptions<T> {
-// 	isSettable: true;
-// 	setParser: (value: T) => ArrayBuffer;
-// }
-// interface BLEServiceOptions<T> extends BLEBaseOptionsServiceOptions<T> {
-// 	isReadable: true;
-// 	readParser: (dataView: DataView) => T;
-// }
 
-// interface BLEServiceOptions<T> extends BLEBaseOptionsServiceOptions<T> {
-// 	isNotifiable: true;
-// 	readParser: (dataView: DataView) => T;
-// 	//onNotification: (func: (value: T) => void) => void;
-// }
-/*
-interface BleServiceBuilder<T> {
-	(bleServer: BluetoothRemoteGATTServer, options: BLEServiceOptions<T>): BLEService<T>;
-}*/
+export const createBleDevice = (bleServices: BLEService<string>[]) => {
+	let bleDevice: BluetoothDevice | undefined = undefined;
+	//let bleServer: BluetoothRemoteGATTServer | undefined = undefined;
 
-export const createBLEService = async <T>(
-	bleServer: BluetoothRemoteGATTServer,
-	options: BLEServiceOptions<T>
-): Promise<BLEService<T>> => {
-	const { serviceId, characteristicId, readParser, setParser } = options;
-
-	if (!bleServer.connected) throw new Error('BLE Server not connected');
-	const service = await bleServer.getPrimaryService(serviceId);
-	const characteristic = await service.getCharacteristic(characteristicId);
-
-	if (options.isNotifiable) {
-		await characteristic.startNotifications();
-		console.log('add notification for: ', options.characteristicId);
-		await characteristic.startNotifications();
-		characteristic.addEventListener('characteristicvaluechanged', (event) => {
-			const target = event.target as BluetoothRemoteGATTCharacteristic;
-			// console.log('event', event);
-
-			if (!readParser) throw new Error('readParser not defined');
-			if (target.value) {
-				notificationHandler(readParser(target.value));
-			}
+	const connect = async () => {
+		bleDevice = await navigator.bluetooth.requestDevice({
+			filters: [{ namePrefix: 'nrf52' }],
+			optionalServices: bleServices.map((service) => service.serviceId)
 		});
-	}
+		if (!bleDevice.gatt) throw new Error('No GATT server');
+		const bleServer = await bleDevice.gatt?.connect();
+		if (!bleServer) throw new Error('No connect to GATT server');
+		bleServices.forEach((service) => service.connect(bleServer));
+	};
+
+	const disconnect = async () => {
+		await bleDevice?.gatt?.disconnect();
+	};
+
+	const ble = {
+		connect,
+		disconnect,
+		bleDevice
+	};
+	return ble;
+};
+
+export const createBLEService = <T>(options: BLEServiceOptions<T>): BLEService<T> => {
+	const { name, serviceId, characteristicId, readParser, setParser } = options;
+	let characteristic: BluetoothRemoteGATTCharacteristic;
+
+	const connect = async (bleServer: BluetoothRemoteGATTServer) => {
+		if (!bleServer.connected) throw new Error('BLE Server not connected');
+		const service = await bleServer.getPrimaryService(serviceId);
+		characteristic = await service.getCharacteristic(characteristicId);
+
+		if (options.isNotifiable) {
+			await characteristic.startNotifications();
+			console.log('add notification for: ', options.characteristicId);
+			await characteristic.startNotifications();
+			characteristic.addEventListener('characteristicvaluechanged', (event) => {
+				const target = event.target as BluetoothRemoteGATTCharacteristic;
+				console.log('event', { name, event });
+
+				if (!readParser) throw new Error('readParser not defined');
+				if (target.value) {
+					notificationHandler(readParser(target.value));
+				}
+			});
+		}
+	};
+
 	// todo: add a check to see if the characteristic is writable
 	// todo: add a check to see if the characteristic is readable
 	// todo: add a check to see if the characteristic is notifiable
@@ -94,6 +106,8 @@ export const createBLEService = async <T>(
     */
 
 	return {
+		connect,
+		serviceId,
 		getVal,
 		setVal,
 		setValRaw,

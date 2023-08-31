@@ -15,7 +15,10 @@
 		</svg>
 		<ul>
 			<li aria-current={$page.url.pathname === '/' ? 'page' : undefined}>
-				<a href="{base}/">BLE</a>
+				<a href="{base}/">/</a>
+			</li>
+			<li>
+				<a href="{base}/ble">Peer1</a>
 			</li>
 			<li>
 				<a href="{base}/peer1">Peer1</a>
