@@ -1,6 +1,7 @@
 <script>
 	import { base } from '$app/paths';
 	import { page } from '$app/stores';
+	import QrCode from '$lib/components/QrCode.svelte';
 </script>
 
 <header>
@@ -21,6 +22,9 @@
 			</li>
 			<li>
 				<a href="{base}/peer2">Peer2</a>
+			</li>
+			<li>
+				<QrCode value={$page.url.toString()} />
 			</li>
 		</ul>
 	</nav>
