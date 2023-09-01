@@ -32,7 +32,7 @@ export const createBleDevice = (bleServices: BLEService<string>[]) => {
 		if (!bleDevice.gatt) throw new Error('No GATT server');
 		const bleServer = await bleDevice.gatt?.connect();
 		if (!bleServer) throw new Error('No connect to GATT server');
-		bleServices.forEach((service) => service.connect(bleServer));
+		bleServices.forEach(async (service) => await service.connect(bleServer));
 	};
 
 	const disconnect = async () => {
@@ -53,11 +53,12 @@ export const createBLEService = <T>(options: BLEServiceOptions<T>): BLEService<T
 
 	const connect = async (bleServer: BluetoothRemoteGATTServer) => {
 		if (!bleServer.connected) throw new Error('BLE Server not connected');
+		console.info('getPrimaryService', serviceId);
 		const service = await bleServer.getPrimaryService(serviceId);
+		console.log('got primary service', serviceId);
 		characteristic = await service.getCharacteristic(characteristicId);
 		console.log('connected to: ', { name });
 		if (options.isNotifiable) {
-			await characteristic.startNotifications();
 			console.log('add notification for: ', options.characteristicId);
 			await characteristic.startNotifications();
 			characteristic.addEventListener('characteristicvaluechanged', (event) => {
@@ -86,7 +87,9 @@ export const createBLEService = <T>(options: BLEServiceOptions<T>): BLEService<T
 	}
 	async function setVal(value: T) {
 		if (!setParser) throw new Error('setParser not defined');
-		await characteristic.writeValue(setParser(value));
+		const parsedValue = setParser(value);
+		console.log('setVal', { value, parsedValue });
+		await characteristic.writeValue(parsedValue);
 	}
 
 	let notificationHandler: (value: T) => void = (value) => {

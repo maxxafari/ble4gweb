@@ -4,7 +4,7 @@
 	let bleDevice: BluetoothDevice | undefined;
 	let connected = false;
 
-	let ledValue: number[];
+	let ledValue: string;
 	let batteryLevel: string;
 	// reactive
 	$: connected = !!bleDevice;
@@ -17,6 +17,21 @@
 		readParser: (dataView) => dataView.getUint8(0).toString()
 	});
 
+	const leds = createBLEService<string>({
+		name: 'Leds',
+		serviceId: 'a3941db0-a97c-4cf1-943f-a25ff9ba40cd',
+		characteristicId: '5b8c0ab6-a058-4684-b2b6-4a0a692e2d45',
+		isNotifiable: false,
+		readParser: (dataView) => {
+			console.log('dataView leds', dataView);
+
+			return dataView.getInt8(0) + '' + dataView.getInt8(1);
+		},
+		setParser: (str: string) => {
+			const [blue, red] = str.split('').map((s) => parseInt(s));
+			return new Uint8Array([blue, red]);
+		}
+	});
 	const servo = createBLEService<string>({
 		name: 'Servo',
 		serviceId: '847a27cd-ccf0-4f7e-8cb4-d5fe53df2d60',
@@ -39,30 +54,31 @@
 			return buff;
 		}
 	});
-	const ble = createBleDevice([battery, servo]);
+
+	const ble = createBleDevice([leds, servo, battery]);
 
 	async function connectToBLE() {
 		await ble.connect();
+		// wrap this ?
 		battery.onNotification((value) => {
 			console.log('battery value', value);
 			batteryLevel = value;
 		});
 
-		//ledValue = await getVal(ledCharacteristic);
+		// this does not work ..
+		ledValue = await leds.getVal(ledCharacteristic);
 	}
 	async function disconnectBLE() {
 		await ble.disconnect();
 	}
 
-	// async function getLed() {
-	// 	if (!ledCharacteristic) return;
-	// 	ledValue = await getVal(ledCharacteristic);
-	// }
-	// async function setLed(blue: number, red: number) {
-	// 	if (!ledCharacteristic) return;
-	// 	await ledCharacteristic.writeValue(new Uint8Array([blue, red]));
-	// 	getLed();
-	// }
+	async function getLed() {
+		ledValue = await leds.getVal();
+	}
+	async function setLed(str: string) {
+		await leds.setVal(str);
+		getLed();
+	}
 </script>
 
 <svelte:head>
@@ -81,6 +97,8 @@
 		<li>Led: {ledValue}</li>
 		<li>Battery: {batteryLevel}</li>
 		<li><button on:click={() => servo?.setVal('100')}>servo</button></li>
+		<li><button on:click={() => setLed('00')}>00</button></li>
+		<li><button on:click={() => setLed('11')}>11</button></li>
 	</ul>
 </section>
 
