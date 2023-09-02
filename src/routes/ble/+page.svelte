@@ -39,16 +39,15 @@
 		console.log('int8', int8);
 		return int8.buffer;
 	}
-	const servo = createBLEService<string>({
+	const servo = createBLEService<number>({
 		name: 'Servo',
 		serviceId: '847a27cd-ccf0-4f7e-8cb4-d5fe53df2d60',
 		characteristicId: '7c1b818b-dff0-4514-8bcf-f0ad8c79fad9',
 		isNotifiable: false,
-		readParser: (dataView) => dataView.getUint8(0).toString(),
-		setParser: (value: string) => {
-			const degrees: number = parseInt(value);
-
-			const uint8 = new Uint8Array([degrees]);
+		readParser: (dataView) => dataView.getUint8(0),
+		setParser: (degrees: number, speed?: number) => {
+			const servoValues = [degrees, speed || 90]; // i guess 90 is mid point
+			const uint8 = new Uint8Array(servoValues);
 			return uint8.buffer;
 		}
 	});
@@ -79,7 +78,7 @@
 		getLed();
 	}
 	$: {
-		servo.setVal(degrees.toString());
+		servo.setVal(degrees);
 	}
 </script>
 
@@ -98,7 +97,7 @@
 	<ul>
 		<li>Led: {ledValue}</li>
 		<li>Battery: {batteryLevel}</li>
-		<li><button on:click={() => servo?.setVal('90')}>servo</button></li>
+		<li><button on:click={() => servo?.setVal(90)}>servo</button></li>
 		<li><button on:click={() => setLed('00')}>00</button></li>
 		<li><input type="range" min="0" max="180" class="slider" bind:value={degrees} /></li>
 		<li><button on:click={() => setLed('11')}>11</button></li>

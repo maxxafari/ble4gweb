@@ -1,4 +1,4 @@
-interface BLEService<T = string | number> {
+interface BLEService<T> {
 	serviceId: string;
 	connect: (bleServer: BluetoothRemoteGATTServer) => Promise<void>;
 	getVal: () => Promise<T>;
@@ -20,7 +20,7 @@ interface BLEServiceOptions<T> {
 	isNotifiable?: boolean;
 }
 
-export const createBleDevice = (bleServices: BLEService<string>[]) => {
+export const createBleDevice = (bleServices: BLEService<any>[]) => {
 	let bleDevice: BluetoothDevice | undefined = undefined;
 	//let bleServer: BluetoothRemoteGATTServer | undefined = undefined;
 
