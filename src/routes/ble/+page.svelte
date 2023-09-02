@@ -6,6 +6,7 @@
 
 	let ledValue: string;
 	let batteryLevel: string;
+	let degrees = 90;
 	// reactive
 	$: connected = !!bleDevice;
 
@@ -32,6 +33,12 @@
 			return new Uint8Array([blue, red]);
 		}
 	});
+
+	function numberToArrayBuffer(num: number) {
+		const int8 = new Int8Array([num]);
+		console.log('int8', int8);
+		return int8.buffer;
+	}
 	const servo = createBLEService<string>({
 		name: 'Servo',
 		serviceId: '847a27cd-ccf0-4f7e-8cb4-d5fe53df2d60',
@@ -40,18 +47,9 @@
 		readParser: (dataView) => dataView.getUint8(0).toString(),
 		setParser: (value: string) => {
 			const degrees: number = parseInt(value);
-			const bin = degrees.toString(2);
-			const buff = new ArrayBuffer([
-				bin[0],
-				bin[1],
-				bin[2],
-				bin[3],
-				bin[4],
-				bin[5],
-				bin[6],
-				bin[7]
-			]);
-			return buff;
+
+			const uint8 = new Uint8Array([degrees]);
+			return uint8.buffer;
 		}
 	});
 
@@ -66,7 +64,8 @@
 		});
 
 		// this does not work ..
-		ledValue = await leds.getVal(ledCharacteristic);
+		// needs to be awaited some how...
+		// ledValue = await leds.getVal();
 	}
 	async function disconnectBLE() {
 		await ble.disconnect();
@@ -78,6 +77,9 @@
 	async function setLed(str: string) {
 		await leds.setVal(str);
 		getLed();
+	}
+	$: {
+		servo.setVal(degrees.toString());
 	}
 </script>
 
@@ -96,8 +98,9 @@
 	<ul>
 		<li>Led: {ledValue}</li>
 		<li>Battery: {batteryLevel}</li>
-		<li><button on:click={() => servo?.setVal('100')}>servo</button></li>
+		<li><button on:click={() => servo?.setVal('90')}>servo</button></li>
 		<li><button on:click={() => setLed('00')}>00</button></li>
+		<li><input type="range" min="0" max="180" class="slider" bind:value={degrees} /></li>
 		<li><button on:click={() => setLed('11')}>11</button></li>
 	</ul>
 </section>
