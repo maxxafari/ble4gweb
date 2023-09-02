@@ -2,13 +2,20 @@
 	import { getIceServerList } from '$lib/iceServers';
 	import { CallPeer2, WaitForCallAnswerFromPeer2 } from '$lib/signalServer';
 	import Peer, { type SignalData } from 'simple-peer';
+	import { device } from '$lib/device';
+
 	let initiator = true;
 	let peer1: Peer.Instance | null = null;
 
-	let offer = '';
 	let connected = false;
 	let send = '';
 	let data: string[] = [];
+
+	// BLE stuff
+	let BLEConnected = false;
+	let onCommand = (val: string) => {
+		console.log('onCommand not defined', val);
+	};
 
 	const load = async () => {
 		console.log('onload...');
@@ -61,16 +68,36 @@
 			} catch (e) {
 				console.error('could not parse data to string :/', d);
 			}
+			onCommand(d.toString());
 			// window.data = data;
 		});
 	};
 	load();
+	async function connectToBLE() {
+		const con = await device.connect();
+		BLEConnected = con;
+		onCommand = (val: string) => {
+			console.info('got command', val);
+			const [service, value] = val.split(':');
+			if (service in device) {
+				device[service]?.setVal(value);
+			}
+		};
+	}
 </script>
 
 <svelte:head>
 	<title>Peer1</title>
 </svelte:head>
 <div>
+	<div>
+		<p>BLE device</p>
+		{#if BLEConnected}
+			<p>Not connected</p>
+		{:else}
+			<button on:click={() => connectToBLE()}>Connect BLE</button>
+		{/if}
+	</div>
 	<p>Caller (initiator)</p>
 	{#if !connected}
 		<div>

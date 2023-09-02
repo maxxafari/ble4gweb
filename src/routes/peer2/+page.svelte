@@ -2,6 +2,8 @@
 	import { getIceServerList } from '$lib/iceServers';
 	import { AnswerCallFromPeer1, WaitForCallFromPeer1 } from '$lib/signalServer';
 	import Peer, { type SignalData } from 'simple-peer';
+	import { device } from '$lib/device';
+
 	let initiator = false;
 	let peer2: Peer.Instance | null = null;
 
@@ -80,7 +82,11 @@
 		video.srcObject = stream;
 		video.play();
 	}
-	window.video = video;
+
+	function passCommand(serviceName: string, value: string | number) {
+		const commandString = serviceName + ':' + value;
+		peer2?.send(commandString);
+	}
 </script>
 
 <svelte:head>
@@ -107,6 +113,8 @@
 				}}>Send</button
 			>
 		</div>
+		<button on:click={() => passCommand('leds', '00')}>00</button>
+		<button on:click={() => passCommand('leds', '11')}>11</button>
 		<div>
 			<h3>data</h3>
 			<ul>
