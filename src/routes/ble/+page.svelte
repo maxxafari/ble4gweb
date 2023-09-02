@@ -2,14 +2,12 @@
 	import { createBLEService, createBleDevice } from '$lib/BLEServiceBuilder';
 	import { device } from '$lib/device';
 
-	let bleDevice: BluetoothDevice | undefined;
 	let connected = false;
 
 	let ledValue: string;
 	let batteryLevel: string;
 	let degrees = 90;
 	// reactive
-	$: connected = !!bleDevice;
 
 	async function connectToBLE() {
 		await device.connect();

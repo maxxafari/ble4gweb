@@ -1,6 +1,6 @@
 interface BLEService<T> {
 	serviceId: string;
-	connect: (bleServer: BluetoothRemoteGATTServer) => Promise<void>;
+	addServiceTo: (bleServer: BluetoothRemoteGATTServer) => Promise<boolean>;
 	getVal: () => Promise<T>;
 	setValRaw?: (value: ArrayBuffer) => Promise<void>;
 	setVal: (value: T) => Promise<void>;
@@ -22,17 +22,17 @@ interface BLEServiceOptions<T> {
 
 export const createBleDevice = (bleServices: BLEService<any>[]) => {
 	let bleDevice: BluetoothDevice | undefined = undefined;
-	//let bleServer: BluetoothRemoteGATTServer | undefined = undefined;
-
 	const connect = async () => {
 		bleDevice = await navigator.bluetooth.requestDevice({
 			filters: [{ namePrefix: 'nrf52' }],
 			optionalServices: bleServices.map((service) => service.serviceId)
 		});
+
 		if (!bleDevice.gatt) throw new Error('No GATT server');
 		const bleServer = await bleDevice.gatt?.connect();
 		if (!bleServer) throw new Error('No connect to GATT server');
-		bleServices.forEach(async (service) => await service.connect(bleServer));
+		await bleServices.forEach(async (service) => await service.addServiceTo(bleServer));
+		return true;
 	};
 
 	const disconnect = async () => {
@@ -50,8 +50,10 @@ export const createBleDevice = (bleServices: BLEService<any>[]) => {
 export const createBLEService = <T>(options: BLEServiceOptions<T>): BLEService<T> => {
 	const { name, serviceId, characteristicId, readParser, setParser } = options;
 	let characteristic: BluetoothRemoteGATTCharacteristic;
+	let bleServer: BluetoothRemoteGATTServer | undefined = undefined;
 
-	const connect = async (bleServer: BluetoothRemoteGATTServer) => {
+	const addServiceTo = async (new_bleServer: BluetoothRemoteGATTServer) => {
+		bleServer = new_bleServer;
 		if (!bleServer.connected) throw new Error('BLE Server not connected');
 		console.info('getPrimaryService', serviceId);
 		const service = await bleServer.getPrimaryService(serviceId);
@@ -71,6 +73,7 @@ export const createBLEService = <T>(options: BLEServiceOptions<T>): BLEService<T
 				}
 			});
 		}
+		return true;
 	};
 
 	// todo: add a check to see if the characteristic is writable
@@ -80,6 +83,10 @@ export const createBLEService = <T>(options: BLEServiceOptions<T>): BLEService<T
 
 	async function getVal() {
 		if (!readParser) throw new Error('readParser not defined');
+		if (!bleServer?.connected) {
+			console.warn('setVal, no connection', { name });
+			return readParser(new DataView(new ArrayBuffer(0)));
+		}
 		return await readParser(await characteristic.readValue());
 	}
 	async function setValRaw(value: ArrayBuffer) {
@@ -87,13 +94,16 @@ export const createBLEService = <T>(options: BLEServiceOptions<T>): BLEService<T
 	}
 	async function setVal(value: T) {
 		if (!setParser) throw new Error('setParser not defined');
+		if (!bleServer?.connected) {
+			throw new Error('setVal, no connection');
+		}
 		const parsedValue = setParser(value);
 		console.log('setVal', { value, parsedValue });
 		await characteristic.writeValue(parsedValue);
 	}
 
 	let notificationHandler: (value: T) => void = (value) => {
-		console.warn('onNotification not implemented:', { serviceId, characteristicId, value });
+		console.warn('onNotification not implemented:', { name, value });
 	};
 
 	const onNotification = (func: (value: T) => void): void => {
@@ -109,7 +119,7 @@ export const createBLEService = <T>(options: BLEServiceOptions<T>): BLEService<T
     */
 
 	return {
-		connect,
+		addServiceTo,
 		serviceId,
 		getVal,
 		setVal,
