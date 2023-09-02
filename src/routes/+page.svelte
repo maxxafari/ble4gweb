@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createBLEService } from '$lib/BLEService';
+	import { createBLEService } from '$lib/BLEServiceBuilder';
 
 	/// <reference types="web-bluetooth" />
 	const serviceUUID = 'a3941db0-a97c-4cf1-943f-a25ff9ba40cd';
