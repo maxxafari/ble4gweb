@@ -42,6 +42,7 @@
 	"type": "module",
 	"dependencies": {
 		"@sveltejs/adapter-vercel": "^3.0.3",
+		"ngrok": "^5.0.0-beta.2",
 		"qrious": "^4.0.2",
 		"simple-peer": "^9.11.1"
 	}

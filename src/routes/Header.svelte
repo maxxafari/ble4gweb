@@ -78,7 +78,7 @@
 		position: relative;
 		padding: 0;
 		margin: 0;
-		height: 3em;
+		height: 5em;
 		display: flex;
 		justify-content: center;
 		align-items: center;
