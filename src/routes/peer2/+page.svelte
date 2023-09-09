@@ -51,6 +51,9 @@
 				{/each}
 			</ul>
 		</div>
+		{#if !$peer2Store.videoStream}
+			<p>No video streamed</p>
+		{/if}
 		<div class="video-container">
 			<!-- svelte-ignore a11y-media-has-caption -->
 			<video bind:this={video} autoplay muted />

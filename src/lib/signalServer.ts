@@ -66,7 +66,7 @@ export const WaitForCallAnswerFromPeer2 = async (): Promise<SignalData> => {
 	});
 
 	while (!data.answer) {
-		await waitSeconds(2);
+		await waitSeconds(1);
 		data = await receive();
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		if (data.answer && resolve!) resolve!(data.answer);

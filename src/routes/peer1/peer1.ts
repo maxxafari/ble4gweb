@@ -1,10 +1,5 @@
 import { getIceServerList } from '$lib/iceServers';
-import {
-	AnswerCallFromPeer1,
-	CallPeer2,
-	WaitForCallAnswerFromPeer2,
-	WaitForCallFromPeer1
-} from '$lib/signalServer';
+import { CallPeer2, WaitForCallAnswerFromPeer2 } from '$lib/signalServer';
 import Peer, { type SignalData } from 'simple-peer';
 import { writable, get } from 'svelte/store';
 
@@ -15,30 +10,12 @@ type PeerStore = {
 	peer: Peer.Instance | null;
 };
 
-export const lastMessage = writable<string>('');
-
-export const peer1Store = writable<PeerStore>(
-	{
-		created: false,
-		connected: false,
-		videoStream: null,
-		peer: null
-	},
-	() => {
-		if (get(peer1Store).created) return;
-		peer1Store.update((s) => ({ ...s, created: true }));
-		// do we need a create peer here?
-		return () => {
-			console.log('unsubscribed from peer2');
-		};
-	}
-);
-
 export const createPeer1 = async () => {
 	const iceServers = await getIceServerList();
 	const peer1 = new Peer({
 		initiator: true,
 		trickle: false,
+		stream: get(peer1Store).videoStream || undefined,
 		config: {
 			iceServers
 		}
@@ -72,4 +49,33 @@ export const createPeer1 = async () => {
 
 		// now we should get a connection
 	});
+	return peer1;
 };
+
+export const lastMessage = writable<string>('');
+
+export const peer1Store = writable<PeerStore>(
+	{
+		created: false,
+		connected: false,
+		videoStream: null,
+		peer: null
+	},
+	() => {
+		if (get(peer1Store).created) return;
+		peer1Store.update((s) => ({ ...s, created: true }));
+		createPeer1().then((p) => {
+			peer1Store.update((s) => ({ ...s, peer: p }));
+		});
+		return () => {
+			console.log('unsubscribed from peer 1 store');
+		};
+	}
+);
+
+peer1Store.subscribe((s) => {
+	if (s.videoStream && s.peer && s.peer.streams.length === 0) {
+		console.log('peer1Store Adding stream', s);
+		s.peer.addStream(s.videoStream);
+	}
+});

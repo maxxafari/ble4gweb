@@ -58,12 +58,12 @@
 	<input type="checkbox" id="use-video" bind:checked={useVideo} />
 	{#if !$peer1Store.connected}
 		<div>
-			<h4>Calling peer2</h4>
+			<h4>Calling peer2...</h4>
 		</div>
 	{/if}
 	{#if $peer1Store.connected}
 		<div>
-			<h4>Connected</h4>
+			<h4>Connected to Peer2</h4>
 			<p>connected: {$peer1Store.connected ? 'true' : 'false'}</p>
 		</div>
 	{/if}
