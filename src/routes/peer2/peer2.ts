@@ -52,13 +52,13 @@ export const createPeer2 = async () => {
 
 	peer2.on('connect', () => {
 		console.log('CONNECT');
+		ClearCalls();
 		peer2Store.update((s) => ({ ...s, connected: true }));
 		peer2?.send('Hi im connected now, ' + new Date().toISOString());
 	});
 
 	peer2.on('close', () => {
 		console.log('CLOSE');
-		ClearCalls();
 		peer2Store.update((s) => ({ ...s, connected: false }));
 		createPeer2();
 	});
