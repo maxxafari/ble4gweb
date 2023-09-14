@@ -15,7 +15,7 @@
 	function passCommand(serviceName: string, value: string | number) {
 		const commandString = serviceName + ':' + value;
 		// TODO: FIX THIS
-		$peer2Store.peer?.send(commandString);
+		// $peer2Store.peer?.send(commandString);
 	}
 </script>
 
@@ -37,7 +37,7 @@
 			<textarea id="send" bind:value={send} />
 			<button
 				on:click={() => {
-					$peer2Store.peer?.send(send);
+					// $peer2Store.peer?.send(send);
 					send = '';
 				}}>Send</button
 			>

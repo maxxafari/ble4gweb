@@ -1,89 +1,48 @@
 import { getIceServerList } from '$lib/iceServers';
-import { AnswerCallFromPeer1, ClearCalls, WaitForCallFromPeer1 } from '$lib/signalServer';
-import Peer, { type SignalData } from 'simple-peer';
+import { createPeerWithIceServers, peer2Id, type PeerStore } from '$lib/peers';
+import { Peer } from 'peerjs';
+import type { DataConnection } from 'peerjs';
+import type { Peer as PeerType } from 'peerjs';
 import { writable, get } from 'svelte/store';
-
-type Peer2Store = {
-	created: boolean;
-	connected: boolean;
-	videoStream: MediaStream | null;
-	peer: Peer.Instance | null;
-};
 
 export const lastMessage = writable<string>('');
 
-export const peer2Store = writable<Peer2Store>(
+export const createPeer2 = async () => {
+	console.info('Creating new peer2');
+	const peer = await createPeerWithIceServers(peer2Id);
+
+	//todo:  add to store
+	return peer;
+};
+
+export const peer2Store = writable<PeerStore>(
 	{
 		created: false,
 		connected: false,
 		videoStream: null,
-		peer: null
+		peer: null,
+		conn: null
 	},
 	() => {
 		if (get(peer2Store).created) return;
 		peer2Store.update((s) => ({ ...s, created: true }));
-		createPeer2();
+		createPeer2().then((peer) => {
+			peer2Store.update((s) => ({ ...s, peer: peer }));
+			bindPeer2(peer);
+		});
 		return () => {
 			console.log('unsubscribed from peer2');
 		};
 	}
 );
 
-export const createPeer2 = async () => {
-	const iceServers = await getIceServerList();
-
-	const peer2 = new Peer({
-		initiator: false,
-		trickle: false,
-		config: {
-			iceServers
-		}
+export const bindPeer2 = async (peer: PeerType) => {
+	//const iceServers = await getIceServerList();
+	console.info('Waiting for call from p1...');
+	peer.on('call', function (call) {
+		console.log('peer2 received call');
+		// Answer the call, providing our mediaStream
+		call.answer();
+		call.dataChannel.send('hi from peer2');
 	});
-
-	peer2.on('error', (err) => console.log('error', err));
-
-	// this will not trigger until we call peer2.signal(answer)
-	peer2.on('signal', async (data: SignalData) => {
-		// wen we have a call and have created an answer we send it back to peer1
-		console.info('answering call from peer1', data);
-		AnswerCallFromPeer1(data);
-		// now we should get a connection
-	});
-
-	peer2.on('connect', () => {
-		console.log('CONNECT');
-		ClearCalls();
-		peer2Store.update((s) => ({ ...s, connected: true }));
-		peer2?.send('Hi im connected now, ' + new Date().toISOString());
-	});
-
-	peer2.on('close', () => {
-		console.log('CLOSE');
-		peer2Store.update((s) => ({ ...s, connected: false }));
-		createPeer2();
-	});
-	peer2.on('error', (err: any) => {
-		console.error('error', err);
-		peer2Store.update((s) => ({ ...s, connected: false }));
-	});
-
-	peer2.on('data', (d: string) => {
-		console.log('GOT data:', d);
-		lastMessage.set(d);
-	});
-	peer2.on('stream', (newStream) => {
-		peer2Store.update((s) => ({ ...s, videoStream: newStream }));
-	});
-
-	peer2Store.update((s) => ({ ...s, peer: peer2 }));
-
-	WaitForCallFromPeer1()
-		.then((answer) => {
-			peer2.signal(answer);
-		})
-		.catch((e) => {
-			console.error('Did not get a call from peer1', e);
-			console.info('Waiting for call again...');
-			// waitForCall();
-		});
 };
