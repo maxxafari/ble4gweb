@@ -14,7 +14,8 @@
 
 	function passCommand(serviceName: string, value: string | number) {
 		const commandString = serviceName + ':' + value;
-		// TODO: FIX THIS peer2?.send(commandString);
+		// TODO: FIX THIS
+		$peer2Store.peer?.send(commandString);
 	}
 </script>
 

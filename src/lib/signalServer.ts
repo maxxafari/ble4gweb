@@ -37,6 +37,10 @@ async function signalSend(data: SignalServerResponseRequest) {
 	});
 }
 
+export const ClearCalls = async (): Promise<void> => {
+	await signalSend({ offer: '', answer: '' });
+};
+
 export async function CallPeer2(offer: SignalData): Promise<void> {
 	await signalSend({ offer, answer: '' });
 }

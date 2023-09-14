@@ -1,5 +1,5 @@
 import { getIceServerList } from '$lib/iceServers';
-import { CallPeer2, WaitForCallAnswerFromPeer2 } from '$lib/signalServer';
+import { CallPeer2, ClearCalls, WaitForCallAnswerFromPeer2 } from '$lib/signalServer';
 import Peer, { type SignalData } from 'simple-peer';
 import { writable, get } from 'svelte/store';
 
@@ -11,6 +11,7 @@ type PeerStore = {
 };
 
 export const createPeer1 = async () => {
+	console.info('Creating new peer1');
 	const iceServers = await getIceServerList();
 	const peer1 = new Peer({
 		initiator: true,
@@ -26,9 +27,11 @@ export const createPeer1 = async () => {
 		peer1?.send('Hi im connected now, ' + new Date().toISOString());
 	});
 
-	peer1.on('close', () => {
+	peer1.on('close', async () => {
 		console.log('CLOSE');
+		ClearCalls();
 		peer1Store.update((s) => ({ ...s, connected: false }));
+		createPeer1();
 	});
 	peer1.on('error', (err: any) => {
 		console.error('error', err);
@@ -49,7 +52,7 @@ export const createPeer1 = async () => {
 
 		// now we should get a connection
 	});
-	return peer1;
+	peer1Store.update((s) => ({ ...s, peer: peer1 }));
 };
 
 export const lastMessage = writable<string>('');
@@ -64,9 +67,7 @@ export const peer1Store = writable<PeerStore>(
 	() => {
 		if (get(peer1Store).created) return;
 		peer1Store.update((s) => ({ ...s, created: true }));
-		createPeer1().then((p) => {
-			peer1Store.update((s) => ({ ...s, peer: p }));
-		});
+		createPeer1();
 		return () => {
 			console.log('unsubscribed from peer 1 store');
 		};

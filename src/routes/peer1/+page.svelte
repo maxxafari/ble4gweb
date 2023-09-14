@@ -18,7 +18,7 @@
 			console.info('got command', val);
 			const [service, value] = val.split(':');
 			if (service in device) {
-				device[service]?.setVal(value); // TODO: FIX TYPINGS
+				// device[service]?.setVal(value); // TODO: FIX TYPINGS
 			}
 		};
 	}

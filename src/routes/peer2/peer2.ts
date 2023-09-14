@@ -1,5 +1,5 @@
 import { getIceServerList } from '$lib/iceServers';
-import { AnswerCallFromPeer1, WaitForCallFromPeer1 } from '$lib/signalServer';
+import { AnswerCallFromPeer1, ClearCalls, WaitForCallFromPeer1 } from '$lib/signalServer';
 import Peer, { type SignalData } from 'simple-peer';
 import { writable, get } from 'svelte/store';
 
@@ -22,17 +22,7 @@ export const peer2Store = writable<Peer2Store>(
 	() => {
 		if (get(peer2Store).created) return;
 		peer2Store.update((s) => ({ ...s, created: true }));
-		createPeer2().then((peer) => {
-			WaitForCallFromPeer1()
-				.then((answer) => {
-					peer.signal(answer);
-				})
-				.catch((e) => {
-					console.error('Did not get a call from peer1', e);
-					console.info('Waiting for call again...');
-					// waitForCall();
-				});
-		});
+		createPeer2();
 		return () => {
 			console.log('unsubscribed from peer2');
 		};
@@ -68,7 +58,9 @@ export const createPeer2 = async () => {
 
 	peer2.on('close', () => {
 		console.log('CLOSE');
+		ClearCalls();
 		peer2Store.update((s) => ({ ...s, connected: false }));
+		createPeer2();
 	});
 	peer2.on('error', (err: any) => {
 		console.error('error', err);
@@ -82,5 +74,16 @@ export const createPeer2 = async () => {
 	peer2.on('stream', (newStream) => {
 		peer2Store.update((s) => ({ ...s, videoStream: newStream }));
 	});
-	return peer2;
+
+	peer2Store.update((s) => ({ ...s, peer: peer2 }));
+
+	WaitForCallFromPeer1()
+		.then((answer) => {
+			peer2.signal(answer);
+		})
+		.catch((e) => {
+			console.error('Did not get a call from peer1', e);
+			console.info('Waiting for call again...');
+			// waitForCall();
+		});
 };
