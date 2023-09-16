@@ -65,6 +65,9 @@
 		<div>
 			<h4>Connected to Peer2</h4>
 			<p>connected: {$peer1Store.connected ? 'true' : 'false'}</p>
+			<button on:click={() => $peer1Store.dataConn?.send({ message: 'ping!', date: new Date() })}
+				>Send data</button
+			>
 		</div>
 	{/if}
 </div>
