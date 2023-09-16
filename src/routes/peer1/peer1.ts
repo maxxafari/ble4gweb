@@ -1,5 +1,10 @@
-import { getIceServerList } from '$lib/iceServers';
-import { createPeerWithIceServers, peer1Id, peer2Id, type PeerStore } from '$lib/peers';
+import {
+	bindConnection,
+	createPeerWithIceServers,
+	peer1Id,
+	peer2Id,
+	type PeerStore
+} from '$lib/peers';
 import type { Peer as PeerType } from 'peerjs';
 import type { DataConnection } from 'peerjs';
 import { writable, get } from 'svelte/store';
@@ -9,9 +14,8 @@ export const createPeer1 = async () => {
 	const peer = await createPeerWithIceServers(peer1Id);
 
 	peer.on('open', () => {
-		console.info('open');
-		peer1Store.update((s) => ({ ...s, connected: true }));
-		// peer.send('Hi im connected now, ' + new Date().toISOString());
+		console.info('peer open');
+		connectToP2(peer);
 	});
 
 	peer1Store.update((s) => ({ ...s, peer: peer }));
@@ -20,20 +24,23 @@ export const createPeer1 = async () => {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 let callFails = 0;
-const callP2 = async (peer: PeerType) => {
+const connectToP2 = async (peer: PeerType) => {
 	try {
-		console.log('calling p2');
+		console.log('connecting to p2');
 		const conn = peer.connect(peer2Id);
 
 		bindConnection(conn);
-		peer1Store.update((s) => ({ ...s, conn: conn }));
+		peer1Store.update((s) => ({ ...s, conn: conn, connected: true }));
+		peer1Store.update((s) => ({ ...s, connected: true }));
+
 		callFails = 0;
 	} catch (e) {
-		console.log('call to p2 failed', e);
+		console.log('data conn to p2 failed', e);
 		callFails++;
 		setTimeout(() => {
-			callP2(peer);
-		}, 1000);
+			console.log('retrying conn to p2');
+			connectToP2(peer);
+		}, 10000);
 	}
 };
 
@@ -53,26 +60,12 @@ export const peer1Store = writable<PeerStore>(
 		console.info('new subscription for peer1');
 		createPeer1().then((peer) => {
 			peer1Store.update((s) => ({ ...s, peer: peer }));
-			callP2(peer);
 		});
 		return () => {
 			console.log('TODO, destroy peer1');
 		};
 	}
 );
-
-const bindConnection = (conn: DataConnection) => {
-	conn.on('data', (data) => {
-		console.log('data', data);
-	});
-	conn.on('error', (err) => {
-		console.log('conn error', err);
-	});
-	conn.on('open', () => {
-		console.log('conn open!');
-		conn.send('hello!');
-	});
-};
 
 // peer1Store.subscribe((s) => {
 // 	if (s.videoStream && s.peer && s.peer.streams.length === 0) {

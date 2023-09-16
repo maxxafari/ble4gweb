@@ -1,7 +1,6 @@
 import { getIceServerList } from '$lib/iceServers';
-import { createPeerWithIceServers, peer2Id, type PeerStore } from '$lib/peers';
+import { bindConnection, createPeerWithIceServers, peer2Id, type PeerStore } from '$lib/peers';
 import { Peer } from 'peerjs';
-import type { DataConnection } from 'peerjs';
 import type { Peer as PeerType } from 'peerjs';
 import { writable, get } from 'svelte/store';
 
@@ -10,8 +9,14 @@ export const lastMessage = writable<string>('');
 export const createPeer2 = async () => {
 	console.info('Creating new peer2');
 	const peer = await createPeerWithIceServers(peer2Id);
-
-	//todo:  add to store
+	bindPeer2(peer);
+	peer.on('open', () => {
+		console.info('peer is open');
+	});
+	peer.on('connection', (conn) => {
+		bindConnection(conn);
+	});
+	peer2Store.update((s) => ({ ...s, peer: peer }));
 	return peer;
 };
 
@@ -28,7 +33,6 @@ export const peer2Store = writable<PeerStore>(
 		peer2Store.update((s) => ({ ...s, created: true }));
 		createPeer2().then((peer) => {
 			peer2Store.update((s) => ({ ...s, peer: peer }));
-			bindPeer2(peer);
 		});
 		return () => {
 			console.log('unsubscribed from peer2');
@@ -39,10 +43,17 @@ export const peer2Store = writable<PeerStore>(
 export const bindPeer2 = async (peer: PeerType) => {
 	//const iceServers = await getIceServerList();
 	console.info('Waiting for call from p1...');
-	peer.on('call', function (call) {
-		console.log('peer2 received call');
-		// Answer the call, providing our mediaStream
-		call.answer();
-		call.dataChannel.send('hi from peer2');
+	peer.on('call', (mediaConn) => {
+		// bindConnection(conn);
+		console.log('peer2 received call (conn)');
+		mediaConn.answer();
+		mediaConn.dataChannel.send('hi from peer2');
+	});
+	console.info('Waiting for call from p1...');
+	peer.on('call', (mediaConn) => {
+		// bindConnection(conn);
+		console.log('peer2 received call (conn)');
+		mediaConn.answer();
+		mediaConn.dataChannel.send('hi from peer2');
 	});
 };

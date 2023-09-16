@@ -1,5 +1,9 @@
 import { Peer } from 'peerjs';
-import type { Peer as PeerType, DataConnection as DataConnectionType } from 'peerjs';
+import type {
+	Peer as PeerType,
+	DataConnection as DataConnectionType,
+	MediaConnection as MediaConnectionType
+} from 'peerjs';
 import { getIceServerList } from './iceServers';
 
 export type PeerStore = {
@@ -17,11 +21,25 @@ export const createPeerWithIceServers = async (id: string) => {
 	const iceServers = await getIceServerList();
 	const peer = new Peer(id, {
 		config: {
-			iceServers: iceServers
+			iceServers: iceServers,
+			debug: 3
 		}
 	});
 	peer.on('error', (err) => {
 		console.log('peer error', err);
 	});
 	return peer;
+};
+
+export const bindConnection = (conn: DataConnectionType) => {
+	conn.on('data', (data) => {
+		console.log('data', data);
+	});
+	conn.on('error', (err) => {
+		console.log('conn error', err);
+	});
+	conn.on('open', () => {
+		console.log('conn open!');
+		conn.send('hello!');
+	});
 };
