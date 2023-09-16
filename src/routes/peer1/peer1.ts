@@ -1,18 +1,21 @@
 import {
+	bindDataConnectionToStore,
 	createPeerWithIceServers,
 	emptyPeerStore,
 	peer1Id,
 	peer2Id,
 	type PeerStore
 } from '$lib/peers';
-import type { Peer as PeerType } from 'peerjs';
+import type { DataConnection, Peer as PeerType } from 'peerjs';
 import { writable, get, type Writable } from 'svelte/store';
 
 export const createPeer1 = async (store: Writable<PeerStore>) => {
 	console.info('Creating new peer1');
-	const peer = await createPeerWithIceServers(peer1Id, store);
-	peer.on('open', () => {
-		connectToP2(peer);
+	await createPeerWithIceServers(peer1Id, store);
+	const peer = get(peer1Store).peer;
+	peer?.on('open', () => {
+		const dataConn = peer.connect(peer2Id);
+		bindDataConnectionToStore(dataConn, store);
 	});
 };
 
@@ -21,8 +24,10 @@ let callFails = 0;
 const connectToP2 = async (peer: PeerType) => {
 	try {
 		console.log('connecting to p2');
-		const conn = peer.connect(peer2Id);
+		const dataConn = peer.connect(peer2Id);
+		const store = peer1Store;
 		// will it fail here?
+
 		callFails = 0;
 	} catch (e) {
 		console.log('data conn to p2 failed', e);

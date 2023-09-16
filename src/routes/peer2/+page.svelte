@@ -7,8 +7,8 @@
 	let video: HTMLVideoElement;
 
 	$: {
-		if ($peer2Store.videoStream && video) {
-			video.srcObject = $peer2Store.videoStream;
+		if ($peer2Store.mediaStream && video) {
+			video.srcObject = $peer2Store.mediaStream;
 		}
 	}
 

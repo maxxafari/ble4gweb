@@ -74,7 +74,10 @@ const bindPeerToStore = (peer: PeerType, store: Writable<PeerStore>) => {
 	store.update((s): PeerStore => ({ ...s, peer: peer }));
 };
 
-const bindDataConnectionToStore = (dataConn: DataConnectionType, store: Writable<PeerStore>) => {
+export const bindDataConnectionToStore = (
+	dataConn: DataConnectionType,
+	store: Writable<PeerStore>
+) => {
 	dataConn.on('data', (data) => {
 		console.info('dataConn gotData', data);
 	});

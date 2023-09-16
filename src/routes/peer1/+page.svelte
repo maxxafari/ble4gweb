@@ -61,10 +61,10 @@
 			<h4>Calling peer2...</h4>
 		</div>
 	{/if}
-	{#if $peer1Store.connected}
+	{#if $peer1Store.dataConn}
 		<div>
 			<h4>Connected to Peer2</h4>
-			<p>connected: {$peer1Store.connected ? 'true' : 'false'}</p>
+			<p>has dataConn: {$peer1Store.dataConn ? 'true' : 'false'}</p>
 			<button on:click={() => $peer1Store.dataConn?.send({ message: 'ping!', date: new Date() })}
 				>Send data</button
 			>
