@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { device } from '$lib/device';
 	import { peer2Store } from './peer2';
 
 	let send = '';
