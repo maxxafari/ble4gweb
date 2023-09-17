@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { device } from '$lib/device';
 	import type { PeerStore } from '$lib/peers';
-	import { peer1Store } from './peer1';
+	import { lastCommand, peer1Store } from './peer1';
 
 	// BLE stuff
 	let BLEConnected = false;
 	let useVideo = false;
-	let onCommand = (val: string) => {
-		console.log('onCommand not defined', val);
+	let onCommand = (service: string, value: string | number) => {
+		console.log('onCommand not defined', { service, value });
 	};
 
 	let send = '';
@@ -15,14 +15,22 @@
 	async function connectToBLE() {
 		const con = await device.connect();
 		BLEConnected = con;
-		onCommand = (val: string) => {
-			console.info('got command', val);
-			const [service, value] = val.split(':');
+		onCommand = (service: string, value: string | number) => {
+			console.info('got command', value);
 			if (service in device) {
-				// device[service]?.setVal(value); // TODO: FIX TYPINGS
+				if (service === 'leds') {
+					device.leds.setVal(value.toString());
+				} else if (service === 'servo') {
+					device.servo.setVal(parseInt(value.toString()));
+				}
 			}
 		};
 	}
+
+	lastCommand.subscribe((c: any) => {
+		if (c.serviceName) onCommand(c.serviceName, c.value);
+	});
+
 	$: {
 		if (useVideo) {
 			navigator.mediaDevices

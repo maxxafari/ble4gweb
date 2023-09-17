@@ -18,6 +18,7 @@ export type PeerStore = {
 	peer: PeerType | null;
 	dataConn: DataConnectionType | null;
 	mediaConn: MediaConnectionType | null;
+	lastCommand: object | null;
 };
 
 export const emptyPeerStore: PeerStore = {
@@ -27,7 +28,8 @@ export const emptyPeerStore: PeerStore = {
 	open: false,
 	peer: null,
 	dataConn: null,
-	mediaConn: null
+	mediaConn: null,
+	lastCommand: null
 };
 
 export const clearStore = (store: Writable<PeerStore>) => {
@@ -99,6 +101,9 @@ export const bindDataConnectionToStore = (
 
 	dataConn.on('data', (data) => {
 		console.info('dataConn gotData', data);
+		if (typeof data === 'object') {
+			store.update((s): PeerStore => ({ ...s, lastCommand: data }));
+		}
 	});
 	dataConn.on('open', () => {
 		console.info('dataConn open!');

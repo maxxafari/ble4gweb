@@ -13,9 +13,11 @@
 
 	function passCommand(serviceName: string, value: string | number) {
 		const commandString = serviceName + ':' + value;
+		// predefine valid commands
+		// todo share these commands and and in p1 pass to ble and in p2 pass to p1
 		$peer2Store.dataConn?.send({
-			type: 'message',
-			data: commandString
+			serviceName,
+			value
 		});
 	}
 </script>

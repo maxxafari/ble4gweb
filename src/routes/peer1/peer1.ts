@@ -6,7 +6,7 @@ import {
 	peer2Id,
 	type PeerStore
 } from '$lib/peers';
-import { writable, get, type Writable } from 'svelte/store';
+import { writable, get, type Writable, derived } from 'svelte/store';
 
 const connectToP2 = async (store: Writable<PeerStore>) => {
 	const peer = get(peer1Store).peer;
@@ -68,3 +68,5 @@ peer1Store.subscribe(({ peer, mediaStream, mediaConn }) => {
 		peer1Store.update((s) => ({ ...s, mediaConn: null }));
 	}
 });
+
+export const lastCommand = derived(peer1Store, ($peer1Store) => $peer1Store.lastCommand);
