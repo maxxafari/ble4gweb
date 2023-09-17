@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { device } from '$lib/device';
+	import type { PeerStore } from '$lib/peers';
 	import { peer1Store } from './peer1';
 
 	// BLE stuff
@@ -30,10 +31,10 @@
 					//audio: true
 				})
 				.then((stream) => {
-					peer1Store.update((s) => {
+					peer1Store.update((s: PeerStore): PeerStore => {
 						return {
 							...s,
-							videoStream: stream
+							mediaStream: stream
 						};
 					});
 				});

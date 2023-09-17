@@ -56,3 +56,10 @@ export const peer1Store = writable<PeerStore>(emptyPeerStore, () => {
 		console.info('No subscription  peer1');
 	};
 });
+
+peer1Store.subscribe(({ peer, mediaStream, mediaConn }) => {
+	if (mediaStream && peer && !mediaConn) {
+		console.log('mediaStream changed');
+		peer?.call(peer2Id, mediaStream);
+	}
+});
