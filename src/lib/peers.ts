@@ -5,7 +5,7 @@ import type {
 	MediaConnection as MediaConnectionType
 } from 'peerjs';
 import { getIceServerList } from './iceServers';
-import type { Writable } from 'svelte/store';
+import { get, type Writable } from 'svelte/store';
 
 export const peer1Id = 'ble-controller-p1';
 export const peer2Id = 'ble-controller-p2';
@@ -30,7 +30,17 @@ export const emptyPeerStore: PeerStore = {
 	mediaConn: null
 };
 
+export const clearStore = (store: Writable<PeerStore>) => {
+	console.log('clearing store');
+	const { peer, dataConn, mediaConn, mediaStream } = get(store);
+	if (dataConn) dataConn.close();
+	if (mediaConn) mediaConn.close();
+	if (mediaStream) mediaStream.getTracks().forEach((t) => t.stop());
+	if (peer) peer.destroy();
+	store.set(emptyPeerStore);
+};
 export const createPeerWithIceServers = async (id: string, store: Writable<PeerStore>) => {
+	//clearStore(store);
 	const iceServers = await getIceServerList();
 	const peer = new Peer(id, {
 		config: {
@@ -43,6 +53,11 @@ export const createPeerWithIceServers = async (id: string, store: Writable<PeerS
 };
 
 const bindPeerToStore = (peer: PeerType, store: Writable<PeerStore>) => {
+	store.update((s): PeerStore => {
+		s.peer?.removeAllListeners();
+		s.peer?.destroy();
+		return { ...s, peer: peer };
+	});
 	peer.on('open', () => {
 		console.info('peer open, connected to server');
 		store.update((s): PeerStore => ({ ...s, open: true }));
@@ -59,25 +74,32 @@ const bindPeerToStore = (peer: PeerType, store: Writable<PeerStore>) => {
 	});
 	console.info('waiting for call');
 	peer.on('close', () => {
-		console.info('peer closed, reconnecting ');
+		console.info('peer closed,  ');
 		store.update((s): PeerStore => ({ ...s, connected: false }));
-		peer.reconnect();
+		// peer.reconnect();
 	});
 	peer.on('disconnected', () => {
-		console.info('peer disconnected, reconnecting ');
+		console.info('peer disconnected,  ');
 		store.update((s): PeerStore => ({ ...s, connected: false }));
-		peer.reconnect();
+		// peer.reconnect();
 	});
 	peer.on('error', (err) => {
-		console.info('peer error', err);
+		console.error('peer error type', err.type);
+		console.error('peer error', { err });
 	});
-	store.update((s): PeerStore => ({ ...s, peer: peer }));
 };
 
 export const bindDataConnectionToStore = (
 	dataConn: DataConnectionType,
 	store: Writable<PeerStore>
 ) => {
+	store.update((s): PeerStore => {
+		s.dataConn?.removeAllListeners();
+		s.dataConn?.close();
+
+		return { ...s, dataConn };
+	});
+
 	dataConn.on('data', (data) => {
 		console.info('dataConn gotData', data);
 	});
@@ -92,10 +114,14 @@ export const bindDataConnectionToStore = (
 	dataConn.on('error', (err) => {
 		console.info('dataConn error', err);
 	});
-	store.update((s): PeerStore => ({ ...s, dataConn }));
 };
 
 const bindMediaConnectionToStore = (mediaConn: MediaConnectionType, store: Writable<PeerStore>) => {
+	store.update((s): PeerStore => {
+		s.mediaConn?.removeAllListeners();
+		s.mediaConn?.close();
+		return { ...s, mediaConn };
+	});
 	mediaConn.on('stream', (mediaStream) => {
 		console.info('mediaConn got stream', mediaStream);
 		store.update((s): PeerStore => ({ ...s, mediaStream }));
@@ -107,5 +133,4 @@ const bindMediaConnectionToStore = (mediaConn: MediaConnectionType, store: Writa
 	mediaConn.on('error', (err) => {
 		console.info('mediaConn error', err);
 	});
-	store.update((s): PeerStore => ({ ...s, mediaConn }));
 };
