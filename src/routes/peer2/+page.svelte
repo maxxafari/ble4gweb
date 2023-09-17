@@ -54,7 +54,7 @@
 				{/each}
 			</ul>
 		</div>
-		{#if !$peer2Store.videoStream}
+		w {#if !$peer2Store.mediaStream}
 			<p>No video streamed</p>
 		{/if}
 		<div class="video-container">
