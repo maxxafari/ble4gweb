@@ -8,15 +8,16 @@ import {
 } from '$lib/peers';
 import { writable, get, type Writable } from 'svelte/store';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-let callFails = 0;
 const connectToP2 = async (store: Writable<PeerStore>) => {
 	const peer = get(peer1Store).peer;
 	if (!peer) throw new Error('Peer is null when calling p2');
 	const dataConn = peer.connect(peer2Id);
 	dataConn.once('open', () => {
 		bindDataConnectionToStore(dataConn, store);
-		callFails = 0;
+	});
+	dataConn.once('close', () => {
+		console.info('data connection closed calling p2 again...');
+		connectToP2(store);
 	});
 	setTimeout(() => {
 		// see if peer2 is connected if not try again
