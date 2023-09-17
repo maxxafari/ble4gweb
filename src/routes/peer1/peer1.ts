@@ -60,6 +60,11 @@ export const peer1Store = writable<PeerStore>(emptyPeerStore, () => {
 peer1Store.subscribe(({ peer, mediaStream, mediaConn }) => {
 	if (mediaStream && peer && !mediaConn) {
 		console.log('mediaStream changed');
-		peer?.call(peer2Id, mediaStream);
+		const newMediaConn = peer?.call(peer2Id, mediaStream);
+		peer1Store.update((s) => ({ ...s, mediaConn: newMediaConn }));
+	} else if (!mediaStream && mediaConn) {
+		console.log('mediaStream cleared');
+		mediaConn.close();
+		peer1Store.update((s) => ({ ...s, mediaConn: null }));
 	}
 });

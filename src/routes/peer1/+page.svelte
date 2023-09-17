@@ -39,6 +39,14 @@
 					});
 				});
 		}
+		if (!useVideo) {
+			peer1Store.update((s: PeerStore): PeerStore => {
+				return {
+					...s,
+					mediaStream: null
+				};
+			});
+		}
 	}
 </script>
 
