@@ -64,7 +64,6 @@ const bindPeerToStore = (peer: PeerType, store: Writable<PeerStore>) => {
 	});
 	peer.on('connection', (conn) => {
 		console.info('peer got connection');
-		store.update((s): PeerStore => ({ ...s, connected: true }));
 		bindDataConnectionToStore(conn, store);
 	});
 	peer.on('call', (mediaConn) => {
@@ -75,12 +74,10 @@ const bindPeerToStore = (peer: PeerType, store: Writable<PeerStore>) => {
 	console.info('waiting for call');
 	peer.on('close', () => {
 		console.info('peer closed,  ');
-		store.update((s): PeerStore => ({ ...s, connected: false }));
 		// peer.reconnect();
 	});
 	peer.on('disconnected', () => {
 		console.info('peer disconnected,  ');
-		store.update((s): PeerStore => ({ ...s, connected: false }));
 		// peer.reconnect();
 	});
 	peer.on('error', (err) => {
@@ -105,14 +102,19 @@ export const bindDataConnectionToStore = (
 	});
 	dataConn.on('open', () => {
 		console.info('dataConn open!');
+		store.update((s): PeerStore => ({ ...s, connected: true }));
 		dataConn.send('hello!');
 	});
 	dataConn.on('close', () => {
 		console.info('dataConn closed');
-		store.update((s): PeerStore => ({ ...s, dataConn: null }));
+		dataConn.removeAllListeners();
+		store.update((s): PeerStore => ({ ...s, dataConn: null, connected: false }));
 	});
 	dataConn.on('error', (err) => {
-		console.info('dataConn error', err);
+		console.info('dataConn error', { err, type: err.type });
+		if (err.type === 'connection-closed') {
+			store.update((s): PeerStore => ({ ...s, connected: false }));
+		}
 	});
 };
 

@@ -20,8 +20,8 @@ const connectToP2 = async (store: Writable<PeerStore>) => {
 	});
 	setTimeout(() => {
 		// see if peer2 is connected if not try again
-		console.info('checking if peer2 is connected: ', dataConn.peerConnection.connectionState);
-		if (!['connecting', 'connected'].includes(dataConn.peerConnection.connectionState)) {
+		console.info('checking if peer2 is connected: ', dataConn.peerConnection?.connectionState);
+		if (!['connecting', 'connected'].includes(dataConn.peerConnection?.connectionState)) {
 			dataConn.removeAllListeners();
 			console.info('retrying connection to peer2');
 			connectToP2(store);
