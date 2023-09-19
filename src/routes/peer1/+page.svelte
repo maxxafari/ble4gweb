@@ -27,8 +27,10 @@
 		};
 	}
 
-	lastCommand.subscribe((c: any) => {
-		if (c.serviceName) onCommand(c.serviceName, c.value);
+	lastCommand.subscribe((c) => {
+		if (c) {
+			console.log('got command', c);
+		}
 	});
 
 	$: {

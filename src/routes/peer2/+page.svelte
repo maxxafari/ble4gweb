@@ -1,24 +1,21 @@
 <script lang="ts">
+	import { bindCommands } from '$lib/commands';
 	import { peer2Store } from './peer2';
 
 	let send = '';
 	let data: string[] = [];
 	let video: HTMLVideoElement;
-
+	let command = $peer2Store.command;
 	$: {
 		if ($peer2Store.mediaStream && video) {
 			video.srcObject = $peer2Store.mediaStream;
 		}
-	}
-
-	function passCommand(serviceName: string, value: string | number) {
-		const commandString = serviceName + ':' + value;
-		// predefine valid commands
-		// todo share these commands and and in p1 pass to ble and in p2 pass to p1
-		$peer2Store.dataConn?.send({
-			serviceName,
-			value
-		});
+		if ($peer2Store.dataConn) {
+			$peer2Store.dataConn.on('data', (d) => {
+				console.log('got data: ', d);
+			});
+			command = $peer2Store.command;
+		}
 	}
 </script>
 
@@ -45,8 +42,8 @@
 				}}>Send</button
 			>
 		</div>
-		<button on:click={() => passCommand('leds', '00')}>00</button>
-		<button on:click={() => passCommand('leds', '11')}>11</button>
+		<button on:click={() => command.setLed(1, false)}>0</button>
+		<button on:click={() => command.setLed(1, true)}>1</button>
 		<div>
 			<h3>data</h3>
 			<ul>

@@ -17,10 +17,3 @@ export const peer2Store = writable<PeerStore>(emptyPeerStore, () => {
 		console.info('No subscription  peer2');
 	};
 });
-peer2Store.subscribe((s) => {
-	if (s.dataConn) {
-		console.error('not implemented');
-		// bindCommands(s.dataConn);
-		// TODO : pass commands to page... derived store ? add actions to store ?
-	}
-});

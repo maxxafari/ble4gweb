@@ -1,3 +1,4 @@
+import type { CommandList, SentCommand } from '$lib/commands';
 import {
 	bindDataConnectionToStore,
 	createPeerWithIceServers,
@@ -69,4 +70,6 @@ peer1Store.subscribe(({ peer, mediaStream, mediaConn }) => {
 	}
 });
 
-export const lastCommand = derived(peer1Store, ($peer1Store) => $peer1Store.lastCommand);
+export const lastCommand = derived(peer1Store, ($peer1Store) => {
+	return $peer1Store.lastCommand as any as SentCommand<keyof CommandList>;
+});

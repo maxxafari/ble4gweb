@@ -6,6 +6,7 @@ import type {
 } from 'peerjs';
 import { getIceServerList } from './iceServers';
 import { get, type Writable } from 'svelte/store';
+import { nonImplementedCommands, type Commands, bindCommands } from './commands';
 
 export const peer1Id = 'ble-controller-p1';
 export const peer2Id = 'ble-controller-p2';
@@ -19,6 +20,7 @@ export type PeerStore = {
 	dataConn: DataConnectionType | null;
 	mediaConn: MediaConnectionType | null;
 	lastCommand: object | null;
+	command: Commands;
 };
 
 export const emptyPeerStore: PeerStore = {
@@ -29,7 +31,8 @@ export const emptyPeerStore: PeerStore = {
 	peer: null,
 	dataConn: null,
 	mediaConn: null,
-	lastCommand: null
+	lastCommand: null,
+	command: nonImplementedCommands
 };
 
 export const clearStore = (store: Writable<PeerStore>) => {
@@ -93,10 +96,12 @@ export const bindDataConnectionToStore = (
 	store: Writable<PeerStore>
 ) => {
 	store.update((s): PeerStore => {
+		console.log('bindCommands!');
+		const command = bindCommands(dataConn);
 		s.dataConn?.removeAllListeners();
 		s.dataConn?.close();
 
-		return { ...s, dataConn };
+		return { ...s, dataConn, command };
 	});
 
 	dataConn.on('data', (data) => {
