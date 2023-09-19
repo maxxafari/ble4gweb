@@ -95,7 +95,7 @@ export const createBLEService = <T>(options: BLEServiceOptions<T>): BLEService<T
 	async function setVal(value: T) {
 		if (!setParser) throw new Error('setParser not defined');
 		if (!bleServer?.connected) {
-			throw new Error('setVal, no connection');
+			return console.error(`${name} setVal, no connection`);
 		}
 		const parsedValue = setParser(value);
 		console.log('setVal', { value, parsedValue });
@@ -107,7 +107,7 @@ export const createBLEService = <T>(options: BLEServiceOptions<T>): BLEService<T
 	};
 
 	const onNotification = (func: (value: T) => void): void => {
-		if (!options.isNotifiable) throw new Error('Characteristic is not notifiable');
+		if (!options.isNotifiable) throw new Error(`${name} Characteristic is not set as notifiable`);
 		notificationHandler = func;
 	};
 
