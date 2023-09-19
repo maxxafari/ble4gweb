@@ -41,6 +41,8 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"simple-peer": "^9.11.1"
+		"ngrok": "^5.0.0-beta.2",
+		"peerjs": "^1.5.0",
+		"qrious": "^4.0.2"
 	}
 }
