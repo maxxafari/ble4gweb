@@ -6,6 +6,7 @@
 	let data: string[] = [];
 	let video: HTMLVideoElement;
 	let command = $peer2Store.command;
+	let angle = 0;
 	$: {
 		if ($peer2Store.mediaStream && video) {
 			video.srcObject = $peer2Store.mediaStream;
@@ -15,6 +16,11 @@
 				console.log('got data: ', d);
 			});
 			command = $peer2Store.command;
+		}
+	}
+	$: {
+		if (angle) {
+			command.setServo(1, angle);
 		}
 	}
 </script>
@@ -44,6 +50,7 @@
 		</div>
 		<button on:click={() => command.setLed(1, false)}>0</button>
 		<button on:click={() => command.setLed(1, true)}>1</button>
+		<input type="range" min="0" max="180" bind:value={angle} />
 		<div>
 			<h3>data</h3>
 			<ul>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { CommandList } from '$lib/commands';
 	import { device } from '$lib/device';
 	import type { PeerStore } from '$lib/peers';
 	import { lastCommand, peer1Store } from './peer1';
@@ -6,30 +7,26 @@
 	// BLE stuff
 	let BLEConnected = false;
 	let useVideo = false;
-	let onCommand = (service: string, value: string | number) => {
-		console.log('onCommand not defined', { service, value });
-	};
 
 	let send = '';
 
 	async function connectToBLE() {
 		const con = await device.connect();
 		BLEConnected = con;
-		onCommand = (service: string, value: string | number) => {
-			console.info('got command', value);
-			if (service in device) {
-				if (service === 'leds') {
-					device.leds.setVal(value.toString());
-				} else if (service === 'servo') {
-					device.servo.setVal(parseInt(value.toString()));
-				}
-			}
-		};
 	}
 
 	lastCommand.subscribe((c) => {
 		if (c) {
 			console.log('got command', c);
+			if (!BLEConnected) console.warn('command not sent, BLE not connected');
+			switch (c.key) {
+				case 'L': {
+					device.leds.setVal((c.value as boolean) ? '11' : '00'); // terrible interface fix this.
+				}
+				case 'S': {
+					device.servo.setVal(c.value as number);
+				}
+			}
 		}
 	});
 
