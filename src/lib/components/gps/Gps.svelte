@@ -1,35 +1,50 @@
 <script lang="ts">
-	import { Loader } from '@googlemaps/js-api-loader';
-	import { mapStyle } from './mapStyle';
-	import { PUBLIC_GOOGLE_MAP_API_KEY } from '$env/static/public';
-	const API_KEY = PUBLIC_GOOGLE_MAP_API_KEY;
-	const loader = new Loader({
-		apiKey: API_KEY,
-		version: 'weekly'
-		// TODO: add styles:
-	});
+	import { loadMap } from './load';
 
 	let container: HTMLElement;
-	let map;
-	let zoom = 8;
-	let center = { lat: -34.397, lng: 150.644 };
-
-	import { onMount } from 'svelte';
-
-	$: {
-		if (container) {
-			loader.load().then(async () => {
-				const { Map } = (await google.maps.importLibrary('maps')) as google.maps.MapsLibrary;
-				map = new Map(container, {
-					center: { lat: -34.397, lng: 150.644 },
-					zoom: 8
-				});
-			});
-		}
+	let map: google.maps.Map | null = null;
+	let zoom = 20;
+	let compass: number | null = 0;
+	let compassCorrection = 360 / 2;
+	// lat long stockholm
+	let center = { lat: 59.3293, lng: 18.0686 };
+	// get browser location
+	if (navigator.geolocation) {
+		navigator.geolocation.getCurrentPosition((position) => {
+			center = {
+				lat: position.coords.latitude,
+				lng: position.coords.longitude
+			};
+		});
 	}
+	// get compass heading
+	if (window.DeviceOrientationEvent) {
+		// Listen for the deviceorientation event and handle the raw data
+		window.addEventListener('deviceorientation', function (event) {
+			if (event.webkitCompassHeading) {
+				// Apple works only with this, alpha doesn't work TODO verify!
+				compass = event.webkitCompassHeading;
+			} else compass = event.alpha; // might be beta or  gamma // add corrections in interface
+		});
+	}
+
+	$: loadMap(container).then((gMap) => {
+		map = gMap;
+	});
+
+	function fixOrientation(deviceDegrees: number, offset: number) {
+		console.log('fixOrientation', offset, map);
+
+		map?.setHeading(deviceDegrees + offset);
+	}
+	$: fixOrientation(0, compassCorrection);
 </script>
 
 <div class="full-screen" bind:this={container} />
+<div>
+	<label for="compassCorrection">Fix orientation</label>
+	<input name="compassCorrection" type="range" min="0" max="360" bind:value={compassCorrection} />
+</div>
 
 <style>
 	.full-screen {
