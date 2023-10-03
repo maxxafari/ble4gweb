@@ -3,6 +3,7 @@
 
 	let container: HTMLElement;
 	let map: google.maps.Map | null = null;
+	let deviceMarker: google.maps.Marker | null = null;
 	let zoom = 20;
 	let compass: number | null = 0;
 	let compassCorrection = 360 / 2;
@@ -29,12 +30,12 @@
 	}
 
 	$: loadMap(container).then((gMap) => {
-		map = gMap;
+		if (!gMap) return;
+		map = gMap.map;
+		deviceMarker = gMap.deviceMarker;
 	});
 
 	function fixOrientation(deviceDegrees: number, offset: number) {
-		console.log('fixOrientation', offset, map);
-
 		map?.setHeading(deviceDegrees + offset);
 	}
 	$: fixOrientation(0, compassCorrection);
