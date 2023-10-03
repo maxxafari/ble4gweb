@@ -1,3 +1,4 @@
+import type { SearingStore } from '../routes/peer2/stearing';
 import { createBLEService, createBleDevice } from './BLEServiceBuilder';
 
 const battery = createBLEService<string>({
@@ -18,9 +19,14 @@ const leds = createBLEService<string>({
 
 		return dataView.getInt8(0) + '' + dataView.getInt8(1);
 	},
-	setParser: (str: string) => {
-		const [blue, red] = str.split('').map((s) => parseInt(s));
-		return new Uint8Array([blue, red]);
+	setParser: (data: string | SearingStore) => {
+		if (typeof data === 'string') {
+			const [blue, red] = data.split('').map((d) => parseInt(d));
+			return new Uint8Array([blue, red]);
+		} else {
+			const uint8array = new TextEncoder().encode('X' + data.gear + data.direction); //  + data.speed
+			return uint8array.buffer;
+		}
 	}
 });
 

@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { bindCommands } from '$lib/commands';
 	import { peer2Store } from './peer2';
+	import { onKeyDown, onKeyUp, searingStore as stearStore } from './stearing';
+	// commands that can be forwarded to BLE device over dataConn
 
 	let send = '';
 	let data: string[] = [];
@@ -23,6 +24,9 @@
 			command.setServo(1, angle);
 		}
 	}
+	stearStore.subscribe((stearing) => {
+		command.setStearing(stearing);
+	});
 </script>
 
 <svelte:head>
@@ -68,6 +72,8 @@
 		</div>
 	{/if}
 </div>
+
+<svelte:window on:keydown|preventDefault={onKeyDown} on:keyup|preventDefault={onKeyUp} />
 
 <style>
 	textarea {

@@ -1,6 +1,5 @@
+import type { SearingStore } from '../routes/peer2/stearing';
 import type { PeerStore } from './peers';
-
-// commands that can be forwarded to BLE device over dataConn
 
 export interface CommandList {
 	led: {
@@ -12,6 +11,11 @@ export interface CommandList {
 		key: 'S';
 		number: number;
 		value: number;
+	};
+	stear: {
+		key: 'X';
+		number: 0;
+		value: SearingStore;
 	};
 }
 
@@ -37,7 +41,8 @@ function notImplemented(...args: unknown[]) {
 
 export const nonImplementedCommands: Commands = {
 	setLed: notImplemented,
-	setServo: notImplemented
+	setServo: notImplemented,
+	setStearing: notImplemented
 };
 
 export const bindCommands = (dataConn: NonNullable<PeerStore['dataConn']>) => {
@@ -50,15 +55,18 @@ export const bindCommands = (dataConn: NonNullable<PeerStore['dataConn']>) => {
 	};
 
 	// type guard for CommandSent
-
 	function setLed(ledNumber: number, on: boolean) {
 		send('L', ledNumber, on);
 	}
 	function setServo(servoNumber: number, angle: number) {
 		send('S', servoNumber, angle);
 	}
+	function setStearing(stearing: SearingStore) {
+		send('X', 0, stearing);
+	}
 	return {
 		setLed,
-		setServo
+		setServo,
+		setStearing
 	};
 };

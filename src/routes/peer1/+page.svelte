@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { SearingStore } from '../peer2/stearing.ts';
 	import type { CommandList } from '$lib/commands';
 	import { device } from '$lib/device';
 	import type { PeerStore } from '$lib/peers';
@@ -20,11 +21,23 @@
 			console.log('got command', c);
 			if (!BLEConnected) console.warn('command not sent, BLE not connected');
 			switch (c.key) {
+				case 'X': {
+					const { gear, direction } = c.value as SearingStore;
+					const uint8array = new TextEncoder().encode('X' + gear + direction); //  + data.speed
+					device.leds.setValRaw(uint8array.buffer);
+					return;
+				}
 				case 'L': {
 					device.leds.setVal((c.value as boolean) ? '11' : '00'); // terrible interface fix this.
+					return;
 				}
 				case 'S': {
 					device.servo.setVal(c.value as number);
+					return;
+				}
+				default: {
+					console.warn('unknown command', c);
+					return;
 				}
 			}
 		}

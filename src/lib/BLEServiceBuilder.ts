@@ -2,7 +2,7 @@ interface BLEService<T> {
 	serviceId: string;
 	addServiceTo: (bleServer: BluetoothRemoteGATTServer) => Promise<boolean>;
 	getVal: () => Promise<T>;
-	setValRaw?: (value: ArrayBuffer) => Promise<void>;
+	setValRaw: (value: ArrayBuffer) => Promise<void>;
 	setVal: (value: T) => Promise<void>;
 	onNotification: (func: (value: T) => void) => void;
 }
