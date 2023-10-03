@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Gps from '$lib/components/gps/Gps.svelte';
 	import { peer2Store } from './peer2';
 	import { onKeyDown, onKeyUp, searingStore as stearStore } from './stearing';
 	// commands that can be forwarded to BLE device over dataConn
@@ -71,6 +72,7 @@
 			<video bind:this={video} autoplay muted />
 		</div>
 	{/if}
+	<Gps />
 </div>
 
 <svelte:window on:keydown|preventDefault={onKeyDown} on:keyup|preventDefault={onKeyUp} />
