@@ -1,20 +1,29 @@
 <script lang="ts">
 	import type { SearingStore } from '../peer2/stearing.ts';
-	import type { CommandList } from '$lib/commands';
 	import { device } from '$lib/device';
 	import type { PeerStore } from '$lib/peers';
 	import { lastCommand, peer1Store } from './peer1';
 
 	// BLE stuff
 	let BLEConnected = false;
-	let useVideo = false;
-
+	let useVideo = true;
+	let wakeLock: WakeLockSentinel | null = null;
 	let send = '';
 
 	async function connectToBLE() {
 		const con = await device.connect();
 		BLEConnected = con;
 	}
+
+	navigator.wakeLock
+		.request('screen')
+		.then((wl) => {
+			wakeLock = wl;
+		})
+		.catch((e) => {
+			console.log('wakeLock error', e);
+		});
+	//
 
 	lastCommand.subscribe((c) => {
 		if (c) {
@@ -47,7 +56,9 @@
 		if (useVideo) {
 			navigator.mediaDevices
 				.getUserMedia({
-					video: true
+					video: {
+						facingMode: 'environment'
+					}
 					//audio: true
 				})
 				.then((stream) => {

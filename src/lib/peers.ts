@@ -86,8 +86,7 @@ const bindPeerToStore = (peer: PeerType, store: Writable<PeerStore>) => {
 		// peer.reconnect();
 	});
 	peer.on('error', (err) => {
-		console.error('peer error type', err.type);
-		console.error('peer error', { err });
+		if (err?.type !== 'peer-unavailable') console.error('peer error', { err });
 	});
 };
 
