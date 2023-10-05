@@ -43,40 +43,35 @@ export const go = {
 	neutral: goNeutral,
 	stop: goStop
 };
-
 export function onKeyDown(e: KeyboardEvent) {
-	switch (e.keyCode) {
-		case 38: // up
+	if (e.repeat) return;
+	switch (e.key) {
+		case 'ArrowUp':
 			go.forward();
 			break;
-		case 40: // down
+		case 'ArrowDown':
 			go.reverse();
 			break;
-		case 37: // left
+		case 'ArrowLeft':
 			go.left();
 			break;
-		case 39: // right
+		case 'ArrowRight':
 			go.right();
 			break;
-		// space
-		case 32: // space
+		case ' ':
 			go.stop();
 			break;
 	}
 }
 
 export function onKeyUp(e: KeyboardEvent) {
-	switch (e.keyCode) {
-		case 38: // up
+	switch (e.key) {
+		case 'ArrowUp':
+		case 'ArrowDown':
 			go.neutral();
 			break;
-		case 40: // down
-			go.neutral();
-			break;
-		case 37: // left
-			go.center();
-			break;
-		case 39: // right
+		case 'ArrowLeft':
+		case 'ArrowRight':
 			go.center();
 			break;
 	}

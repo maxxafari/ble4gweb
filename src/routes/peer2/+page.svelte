@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Gps from '$lib/components/gps/Gps.svelte';
 	import { peer2Store } from './peer2';
-	import { onKeyDown, onKeyUp, searingStore as stearStore } from './stearing';
+	import { onKeyDown, onKeyUp, searingStore } from './stearing';
 	// commands that can be forwarded to BLE device over dataConn
 
 	let send = '';
@@ -25,7 +25,7 @@
 			command.setServo(1, angle);
 		}
 	}
-	stearStore.subscribe((stearing) => {
+	searingStore.subscribe((stearing) => {
 		command.setStearing(stearing);
 	});
 </script>
