@@ -31,8 +31,9 @@
 			if (!BLEConnected) console.warn('command not sent, BLE not connected');
 			switch (c.key) {
 				case 'X': {
-					const { gear, direction } = c.value as SearingStore;
-					const uint8array = new TextEncoder().encode('X' + gear + direction); //  + data.speed
+					const { gear, direction, speed } = c.value as SearingStore;
+					const uint8array = new TextEncoder().encode('X' + gear + direction + 'P'); // P = placeholder for int speed);
+					uint8array[3] = speed;
 					device.leds.setValRaw(uint8array.buffer);
 					return;
 				}

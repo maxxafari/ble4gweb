@@ -8,7 +8,7 @@ export type SearingStore = {
 };
 export const searingStore: Writable<SearingStore> = writable({
 	gear: 'N',
-	speed: 0,
+	speed: 50,
 	direction: 'C'
 });
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import SpeedControl from './SpeedControl.svelte';
 	import Gps from '$lib/components/gps/Gps.svelte';
 	import { peer2Store } from './peer2';
 	import { onKeyDown, onKeyUp, searingStore } from './stearing';
@@ -72,6 +73,7 @@
 			<video bind:this={video} autoplay muted />
 		</div>
 	{/if}
+	<SpeedControl />
 	<Gps />
 </div>
 
