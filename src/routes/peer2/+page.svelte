@@ -77,7 +77,7 @@
 	<Gps />
 </div>
 
-<svelte:window on:keydown|preventDefault={onKeyDown} on:keyup|preventDefault={onKeyUp} />
+<svelte:window on:keydown={onKeyDown} on:keyup={onKeyUp} />
 
 <style>
 	textarea {
