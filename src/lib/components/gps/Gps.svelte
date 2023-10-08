@@ -9,25 +9,6 @@
 	let compassCorrection = 360 / 2;
 	// lat long stockholm
 	let center = { lat: 59.3293, lng: 18.0686 };
-	// get browser location
-	if (navigator.geolocation) {
-		navigator.geolocation.getCurrentPosition((position) => {
-			center = {
-				lat: position.coords.latitude,
-				lng: position.coords.longitude
-			};
-		});
-	}
-	// get compass heading
-	if (window.DeviceOrientationEvent) {
-		// Listen for the deviceorientation event and handle the raw data
-		window.addEventListener('deviceorientation', function (event) {
-			if (event.webkitCompassHeading) {
-				// Apple works only with this, alpha doesn't work TODO verify!
-				compass = event.webkitCompassHeading;
-			} else compass = event.alpha; // might be beta or  gamma // add corrections in interface
-		});
-	}
 
 	$: loadMap(container).then((gMap) => {
 		if (!gMap) return;

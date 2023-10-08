@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { SearingStore } from '../peer2/stearing.ts';
 	import { device } from '$lib/device';
+	import Status from '$lib/components/Status.svelte';
 	import type { PeerStore } from '$lib/peers';
 	import { lastCommand, peer1Store } from './peer1';
 
@@ -111,6 +112,7 @@
 			>
 		</div>
 	{/if}
+	<Status />
 </div>
 
 <style>
