@@ -7,6 +7,7 @@ import {
 	peer2Id,
 	type PeerStore
 } from '$lib/peers';
+import { bindStatusStoreToConnUpStream } from '$lib/statusStore';
 import { writable, get, type Writable, derived } from 'svelte/store';
 
 const connectToP2 = async (store: Writable<PeerStore>) => {
@@ -15,6 +16,8 @@ const connectToP2 = async (store: Writable<PeerStore>) => {
 	const dataConn = peer.connect(peer2Id);
 	dataConn.once('open', () => {
 		bindDataConnectionToStore(dataConn, store);
+		// TODO: only do if peer1 bindStatusStoreToConnUpStream(dataConn);
+		// TODO: only do if peer2 bindStatusStoreToConnDownStream(dataConn);
 	});
 	dataConn.once('close', () => {
 		console.info('data connection closed calling p2 again...');

@@ -112,7 +112,7 @@
 			>
 		</div>
 	{/if}
-	<Status />
+	<Status isSender />
 </div>
 
 <style>
