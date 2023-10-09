@@ -2,7 +2,7 @@
 	import type { SearingStore } from '../peer2/stearing.ts';
 	import { device } from '$lib/device';
 	import Status from '$lib/components/Status.svelte';
-	import type { PeerStore } from '$lib/peers';
+	import type { PeerStoreObj } from '$lib/peers';
 	import { lastCommand, peer1Store } from './peer1';
 
 	// BLE stuff
@@ -64,7 +64,7 @@
 					//audio: true
 				})
 				.then((stream) => {
-					peer1Store.update((s: PeerStore): PeerStore => {
+					peer1Store.update((s: PeerStoreObj): PeerStoreObj => {
 						return {
 							...s,
 							mediaStream: stream
@@ -73,7 +73,7 @@
 				});
 		}
 		if (!useVideo) {
-			peer1Store.update((s: PeerStore): PeerStore => {
+			peer1Store.update((s: PeerStoreObj): PeerStoreObj => {
 				return {
 					...s,
 					mediaStream: null

@@ -5,12 +5,13 @@ import {
 	emptyPeerStore,
 	peer1Id,
 	peer2Id,
-	type PeerStore
+	type PeerStore,
+	type PeerStoreObj
 } from '$lib/peers';
 import { bindStatusStoreToConnUpStream } from '$lib/statusStore';
-import { writable, get, type Writable, derived } from 'svelte/store';
+import { writable, get, derived } from 'svelte/store';
 
-const connectToP2 = async (store: Writable<PeerStore>) => {
+const connectToP2 = async (store: PeerStore) => {
 	const peer = get(peer1Store).peer;
 	if (!peer) throw new Error('Peer is null when calling p2');
 	const dataConn = peer.connect(peer2Id);
@@ -34,7 +35,7 @@ const connectToP2 = async (store: Writable<PeerStore>) => {
 	}, 8000);
 };
 
-export const createPeer1 = async (store: Writable<PeerStore>) => {
+export const createPeer1 = async (store: PeerStore) => {
 	console.info('Creating new peer1');
 	await createPeerWithIceServers(peer1Id, store);
 	const peer = get(peer1Store).peer;
@@ -53,7 +54,7 @@ export const createPeer1 = async (store: Writable<PeerStore>) => {
 
 export const lastMessage = writable<string>('');
 
-export const peer1Store = writable<PeerStore>(emptyPeerStore, () => {
+export const peer1Store: PeerStore = writable<PeerStoreObj>(emptyPeerStore('peer1'), () => {
 	console.info('new subscription for peer1');
 	if (get(peer1Store).peer === null) createPeer1(peer1Store);
 	return () => {

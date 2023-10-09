@@ -1,5 +1,5 @@
 import type { SearingStore } from '../routes/peer2/stearing';
-import type { PeerStore } from './peers';
+import type { PeerStoreObj } from './peers';
 
 export interface CommandList {
 	led: {
@@ -45,7 +45,7 @@ export const nonImplementedCommands: Commands = {
 	setStearing: notImplemented
 };
 
-export const bindCommands = (dataConn: NonNullable<PeerStore['dataConn']>) => {
+export const bindCommands = (dataConn: NonNullable<PeerStoreObj['dataConn']>) => {
 	const send: CommandSent<keyof CommandList> = (key, number, value) => {
 		dataConn.send({
 			key,

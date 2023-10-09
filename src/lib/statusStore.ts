@@ -1,4 +1,7 @@
 import { writable, type Writable } from 'svelte/store';
+import type { DataConnection as DataConnectionType } from 'peerjs';
+
+const storeKey = 'status';
 
 export type StatStore = {
 	gps: { lat: number | null; lng: number | null; alt: number | null; accuracy: number | null };
@@ -41,4 +44,25 @@ export const updStat = (newData: Partial<StatStore>) => {
 	statusStore.update((oldData) => ({ ...oldData, ...newData }));
 };
 
-// TODO create listener to send changes between peers
+const isDataStoreObj = (data: unknown): data is StatStore => {
+	if (typeof data === 'object' && data && 'key' in data && data.key === storeKey) {
+		return true;
+	}
+	return false;
+};
+
+export const bindStatusStoreToConnDownStream = (conn: DataConnectionType) => {
+	conn.on('data', (data) => {
+		if (isDataStoreObj(data)) {
+			updStat(data);
+		}
+	});
+};
+
+export const bindStatusStoreToConnUpStream = (conn: DataConnectionType) => {
+	statusStore.subscribe((data) => {
+		debounce(() => {
+			conn.send(data);
+		});
+	});
+};

@@ -11,7 +11,10 @@ import { nonImplementedCommands, type Commands, bindCommands } from './commands'
 export const peer1Id = 'ble-controller-p1';
 export const peer2Id = 'ble-controller-p2';
 
-export type PeerStore = {
+export type PeerStoreKey = 'peer1' | 'peer2';
+
+export type PeerStoreObj = {
+	key: PeerStoreKey;
 	created: boolean;
 	connected: boolean;
 	open: boolean;
@@ -23,7 +26,8 @@ export type PeerStore = {
 	command: Commands;
 };
 
-export const emptyPeerStore: PeerStore = {
+export const emptyPeerStore = (key: PeerStoreKey): PeerStoreObj => ({
+	key,
 	created: false,
 	connected: false,
 	mediaStream: null,
@@ -33,18 +37,20 @@ export const emptyPeerStore: PeerStore = {
 	mediaConn: null,
 	lastCommand: null,
 	command: nonImplementedCommands
-};
+});
 
-export const clearStore = (store: Writable<PeerStore>) => {
+export type PeerStore = Writable<PeerStoreObj>;
+
+export const clearStore = (store: PeerStore) => {
 	console.log('clearing store');
-	const { peer, dataConn, mediaConn, mediaStream } = get(store);
+	const { peer, dataConn, mediaConn, mediaStream, key } = get(store);
 	if (dataConn) dataConn.close();
 	if (mediaConn) mediaConn.close();
 	if (mediaStream) mediaStream.getTracks().forEach((t) => t.stop());
 	if (peer) peer.destroy();
-	store.set(emptyPeerStore);
+	store.set(emptyPeerStore(key));
 };
-export const createPeerWithIceServers = async (id: string, store: Writable<PeerStore>) => {
+export const createPeerWithIceServers = async (id: string, store: PeerStore) => {
 	//clearStore(store);
 	const iceServers = await getIceServerList();
 	const peer = new Peer(id, {
@@ -57,15 +63,15 @@ export const createPeerWithIceServers = async (id: string, store: Writable<PeerS
 	return peer;
 };
 
-const bindPeerToStore = (peer: PeerType, store: Writable<PeerStore>) => {
-	store.update((s): PeerStore => {
+const bindPeerToStore = (peer: PeerType, store: PeerStore) => {
+	store.update((s): PeerStoreObj => {
 		s.peer?.removeAllListeners();
 		s.peer?.destroy();
 		return { ...s, peer: peer };
 	});
 	peer.on('open', () => {
 		console.info('peer open, connected to server');
-		store.update((s): PeerStore => ({ ...s, open: true }));
+		store.update((s): PeerStoreObj => ({ ...s, open: true }));
 	});
 	peer.on('connection', (conn) => {
 		console.info('peer got connection');
@@ -90,11 +96,8 @@ const bindPeerToStore = (peer: PeerType, store: Writable<PeerStore>) => {
 	});
 };
 
-export const bindDataConnectionToStore = (
-	dataConn: DataConnectionType,
-	store: Writable<PeerStore>
-) => {
-	store.update((s): PeerStore => {
+export const bindDataConnectionToStore = (dataConn: DataConnectionType, store: PeerStore) => {
+	store.update((s): PeerStoreObj => {
 		console.log('bindCommands!');
 		const command = bindCommands(dataConn);
 		s.dataConn?.removeAllListeners();
@@ -106,40 +109,40 @@ export const bindDataConnectionToStore = (
 	dataConn.on('data', (data) => {
 		console.info('dataConn gotData', data);
 		if (typeof data === 'object') {
-			store.update((s): PeerStore => ({ ...s, lastCommand: data }));
+			store.update((s): PeerStoreObj => ({ ...s, lastCommand: data }));
 		}
 	});
 	dataConn.on('open', () => {
 		console.info('dataConn open!');
-		store.update((s): PeerStore => ({ ...s, connected: true }));
+		store.update((s): PeerStoreObj => ({ ...s, connected: true }));
 		dataConn.send('hello!');
 	});
 	dataConn.on('close', () => {
 		console.info('dataConn closed');
 		dataConn.removeAllListeners();
-		store.update((s): PeerStore => ({ ...s, dataConn: null, connected: false }));
+		store.update((s): PeerStoreObj => ({ ...s, dataConn: null, connected: false }));
 	});
 	dataConn.on('error', (err) => {
 		console.info('dataConn error', { err, type: err.type });
 		if (err.type === 'connection-closed') {
-			store.update((s): PeerStore => ({ ...s, connected: false }));
+			store.update((s): PeerStoreObj => ({ ...s, connected: false }));
 		}
 	});
 };
 
-const bindMediaConnectionToStore = (mediaConn: MediaConnectionType, store: Writable<PeerStore>) => {
-	store.update((s): PeerStore => {
+const bindMediaConnectionToStore = (mediaConn: MediaConnectionType, store: PeerStore) => {
+	store.update((s): PeerStoreObj => {
 		s.mediaConn?.removeAllListeners();
 		s.mediaConn?.close();
 		return { ...s, mediaConn };
 	});
 	mediaConn.on('stream', (mediaStream) => {
 		console.info('mediaConn got stream', mediaStream);
-		store.update((s): PeerStore => ({ ...s, mediaStream }));
+		store.update((s): PeerStoreObj => ({ ...s, mediaStream }));
 	});
 	mediaConn.on('close', () => {
 		console.info('mediaConn close');
-		store.update((s): PeerStore => ({ ...s, mediaStream: null }));
+		store.update((s): PeerStoreObj => ({ ...s, mediaStream: null }));
 	});
 	mediaConn.on('error', (err) => {
 		console.info('mediaConn error', err);

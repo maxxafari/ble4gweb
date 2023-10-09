@@ -1,15 +1,20 @@
-import { bindCommands } from '$lib/commands';
-import { createPeerWithIceServers, emptyPeerStore, peer2Id, type PeerStore } from '$lib/peers';
-import { writable, get, type Writable } from 'svelte/store';
+import {
+	createPeerWithIceServers,
+	emptyPeerStore,
+	peer2Id,
+	type PeerStore,
+	type PeerStoreObj
+} from '$lib/peers';
+import { writable } from 'svelte/store';
 
 export const lastMessage = writable<string>('');
 
-export const createPeer2 = async (store: Writable<PeerStore>) => {
+export const createPeer2 = async (store: PeerStore) => {
 	console.info('Creating new peer2');
 	await createPeerWithIceServers(peer2Id, store);
 };
 
-export const peer2Store = writable<PeerStore>(emptyPeerStore, () => {
+export const peer2Store: PeerStore = writable<PeerStoreObj>(emptyPeerStore('peer2'), () => {
 	console.info('new subscription for perStore2');
 	createPeer2(peer2Store);
 
