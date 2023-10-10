@@ -30,7 +30,6 @@ export async function loadMap(container: HTMLElement | undefined): Promise<MapNM
 			map,
 			icon
 		});
-		window.map = map;
 		return { map, deviceMarker };
 	} catch (error) {
 		console.error('error loading map', error);

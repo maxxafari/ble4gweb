@@ -1,14 +1,14 @@
 <script lang="ts">
+	import { statusStore } from '$lib/statusStore';
+
 	import { loadMap } from './load';
 
 	let container: HTMLElement;
 	let map: google.maps.Map | null = null;
 	let deviceMarker: google.maps.Marker | null = null;
-	let zoom = 20;
-	let compass: number | null = 0;
+	let compass = $statusStore.compass;
 	let compassCorrection = 360 / 2;
 	// lat long stockholm
-	let center = { lat: 59.3293, lng: 18.0686 };
 
 	$: loadMap(container).then((gMap) => {
 		if (!gMap) return;
@@ -16,10 +16,20 @@
 		deviceMarker = gMap.deviceMarker;
 	});
 
+	statusStore.subscribe((s) => {
+		if (map && deviceMarker) {
+			//deviceMarker.setPosition(s.gps);
+			if (s.gps.lat && s.gps.lng) {
+				map.setCenter({ lat: s.gps.lat, lng: s.gps.lng });
+				deviceMarker.setPosition({ lat: s.gps.lat, lng: s.gps.lng });
+			}
+		}
+	});
+
 	function fixOrientation(deviceDegrees: number, offset: number) {
 		map?.setHeading(deviceDegrees + offset);
 	}
-	$: fixOrientation(0, compassCorrection);
+	$: fixOrientation(compass || 0, compassCorrection);
 </script>
 
 <div class="full-screen" bind:this={container} />
