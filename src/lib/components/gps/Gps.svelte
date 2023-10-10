@@ -8,7 +8,6 @@
 	let deviceMarker: google.maps.Marker | null = null;
 	let compass = $statusStore.compass;
 	let compassCorrection = 360 / 2;
-	// lat long stockholm
 
 	$: loadMap(container).then((gMap) => {
 		if (!gMap) return;
