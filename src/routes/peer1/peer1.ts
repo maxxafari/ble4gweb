@@ -16,9 +16,9 @@ const connectToP2 = async (store: PeerStore) => {
 	if (!peer) throw new Error('Peer is null when calling p2');
 	const dataConn = peer.connect(peer2Id);
 	dataConn.once('open', () => {
+		// this only fires on peer1
 		bindDataConnectionToStore(dataConn, store);
-		// TODO: only do if peer1 bindStatusStoreToConnUpStream(dataConn);
-		// TODO: only do if peer2 bindStatusStoreToConnDownStream(dataConn);
+		bindStatusStoreToConnUpStream(dataConn);
 	});
 	dataConn.once('close', () => {
 		console.info('data connection closed calling p2 again...');
@@ -38,7 +38,7 @@ const connectToP2 = async (store: PeerStore) => {
 export const createPeer1 = async (store: PeerStore) => {
 	console.info('Creating new peer1');
 	await createPeerWithIceServers(peer1Id, store);
-	const peer = get(peer1Store).peer;
+	const peer = get(store).peer;
 	if (!peer) throw new Error('Peer is null when calling p2');
 	// add unique error handlers for peer1
 	peer?.on('error', (err) => {

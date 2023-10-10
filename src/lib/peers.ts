@@ -7,6 +7,7 @@ import type {
 import { getIceServerList } from './iceServers';
 import { get, type Writable } from 'svelte/store';
 import { nonImplementedCommands, type Commands, bindCommands } from './commands';
+import { bindStatusStoreToConnDownStream, bindStatusStoreToConnUpStream } from './statusStore';
 
 export const peer1Id = 'ble-controller-p1';
 export const peer2Id = 'ble-controller-p2';
@@ -50,10 +51,9 @@ export const clearStore = (store: PeerStore) => {
 	if (peer) peer.destroy();
 	store.set(emptyPeerStore(key));
 };
-export const createPeerWithIceServers = async (id: string, store: PeerStore) => {
-	//clearStore(store);
+export const createPeerWithIceServers = async (peerId: string, store: PeerStore) => {
 	const iceServers = await getIceServerList();
-	const peer = new Peer(id, {
+	const peer = new Peer(peerId, {
 		config: {
 			iceServers: iceServers,
 			debug: 3
@@ -64,6 +64,7 @@ export const createPeerWithIceServers = async (id: string, store: PeerStore) => 
 };
 
 const bindPeerToStore = (peer: PeerType, store: PeerStore) => {
+	const { key } = get(store);
 	store.update((s): PeerStoreObj => {
 		s.peer?.removeAllListeners();
 		s.peer?.destroy();
@@ -74,15 +75,21 @@ const bindPeerToStore = (peer: PeerType, store: PeerStore) => {
 		store.update((s): PeerStoreObj => ({ ...s, open: true }));
 	});
 	peer.on('connection', (conn) => {
+		// this only fires for peer2 // use dataConn.once('open', for pper1
 		console.info('peer got connection');
 		bindDataConnectionToStore(conn, store);
+		if (key === 'peer2') {
+			bindStatusStoreToConnDownStream(conn);
+		}
 	});
 	peer.on('call', (mediaConn) => {
+		// peer 2 only
 		console.info('answering call');
 		bindMediaConnectionToStore(mediaConn, store);
 		mediaConn.answer();
+		console.info('waiting for call');
 	});
-	console.info('waiting for call');
+
 	peer.on('close', () => {
 		console.info('peer closed,  ');
 		// peer.reconnect();

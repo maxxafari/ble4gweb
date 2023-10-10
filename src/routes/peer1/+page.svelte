@@ -70,6 +70,10 @@
 							mediaStream: stream
 						};
 					});
+				})
+				.catch((e) => {
+					useVideo = false;
+					console.log('getUserMedia error', e);
 				});
 		}
 		if (!useVideo) {

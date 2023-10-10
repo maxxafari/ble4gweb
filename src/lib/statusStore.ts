@@ -1,9 +1,10 @@
-import { writable, type Writable } from 'svelte/store';
+import { get, writable, type Writable } from 'svelte/store';
 import type { DataConnection as DataConnectionType } from 'peerjs';
 
 const storeKey = 'status';
 
 export type StatStore = {
+	key: typeof storeKey;
 	gps: { lat: number | null; lng: number | null; alt: number | null; accuracy: number | null };
 	compass: number | null;
 	phoneBattery: number;
@@ -18,6 +19,7 @@ export type StatStore = {
 };
 
 export const statusStore: Writable<StatStore> = writable({
+	key: storeKey,
 	gps: { lat: 0, lng: 0, alt: 0, accuracy: -1 },
 	compass: null,
 	phoneBattery: -1,
@@ -52,6 +54,7 @@ const isDataStoreObj = (data: unknown): data is StatStore => {
 };
 
 export const bindStatusStoreToConnDownStream = (conn: DataConnectionType) => {
+	console.log('bindStatusStoreToConnDownStream');
 	conn.on('data', (data) => {
 		if (isDataStoreObj(data)) {
 			updStat(data);
@@ -60,9 +63,15 @@ export const bindStatusStoreToConnDownStream = (conn: DataConnectionType) => {
 };
 
 export const bindStatusStoreToConnUpStream = (conn: DataConnectionType) => {
+	console.log('bindStatusStoreToConnUpStream');
 	statusStore.subscribe((data) => {
 		debounce(() => {
 			conn.send(data);
 		});
 	});
+	// send initial data
+	const currentState = get(statusStore);
+	console.log('send', currentState);
+
+	conn.send(currentState);
 };

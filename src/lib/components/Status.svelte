@@ -34,10 +34,11 @@
 		if (window.DeviceOrientationEvent) {
 			// Listen for the deviceorientation event and handle the raw data
 			window.addEventListener('deviceorientation', function (event) {
-				if (event.webkitCompassHeading) {
-					// Apple works only with this, alpha doesn't work TODO verify!
-					compass = event.webkitCompassHeading;
-				} else compass = event.alpha; // might be beta or  gamma // add corrections in interface
+				// if (event.webkitCompassHeading) {
+				// Apple works only with this, alpha doesn't work TODO verify!
+				// compass = event.webkitCompassHeading;
+				// } else
+				compass = event.alpha; // might be beta or  gamma // add corrections in interface
 			});
 			stat.update((s) => ({
 				...s,
@@ -59,7 +60,7 @@
 		</li>
 		<li>
 			<span class="label">Gps Acc</span>
-			+/- {$stat.gps.accuracy}m
+			{$stat.gps.accuracy}
 		</li>
 	</ul>
 </div>
