@@ -2,27 +2,17 @@
 	export let isSender = false;
 	import { statusStore as stat } from '../statusStore';
 	import Battery from './Battery.svelte';
-	let center = { lat: 59.3293, lng: 18.0686 };
 	let compass: number | null = 0;
 	if (isSender) {
 		// get browser location
 		if (navigator.geolocation) {
-			navigator.geolocation.getCurrentPosition((position) => {
-				center = {
-					lat: position.coords.latitude,
-					lng: position.coords.longitude
-				};
-			});
+			navigator.geolocation.getCurrentPosition((position) => {});
 		}
 		navigator.geolocation.watchPosition((position) => {
-			center = {
-				lat: position.coords.latitude,
-				lng: position.coords.longitude
-			};
 			stat.update((s) => ({
 				...s,
 				gps: {
-					lat: position.coords.altitude,
+					lat: position.coords.latitude,
 					lng: position.coords.longitude,
 					alt: position.coords.altitude,
 					accuracy: position.coords.accuracy

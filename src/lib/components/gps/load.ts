@@ -10,7 +10,7 @@ type MapNMarker = {
 	deviceMarker: google.maps.Marker;
 };
 
-const icon = '/map-dot.png';
+const icon = '/map-dot2.png';
 export async function loadMap(container: HTMLElement | undefined): Promise<MapNMarker | null> {
 	if (!container) return null;
 	try {
@@ -28,7 +28,8 @@ export async function loadMap(container: HTMLElement | undefined): Promise<MapNM
 		const deviceMarker = new google.maps.Marker({
 			position: center,
 			map,
-			icon
+			icon,
+			optimized: true
 		});
 		return { map, deviceMarker };
 	} catch (error) {
