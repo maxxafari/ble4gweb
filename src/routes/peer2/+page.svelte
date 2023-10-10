@@ -16,9 +16,6 @@
 			video.srcObject = $peer2Store.mediaStream;
 		}
 		if ($peer2Store.dataConn) {
-			$peer2Store.dataConn.on('data', (d) => {
-				console.log('got data: ', d);
-			});
 			command = $peer2Store.command;
 		}
 	}
