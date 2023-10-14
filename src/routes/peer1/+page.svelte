@@ -1,15 +1,16 @@
 <script lang="ts">
-	import type { SearingStore } from '../peer2/stearing.ts';
 	import { device } from '$lib/device';
 	import Status from '$lib/components/Status.svelte';
 	import type { PeerStoreObj } from '$lib/peers';
-	import { lastCommand, peer1Store } from './peer1';
+	import { peer1Store } from './peer1';
+	import { stearingStore } from '$lib/stearingStore';
+	import type { Unsubscriber } from 'svelte/motion';
 
 	// BLE stuff
 	let BLEConnected = false;
 	let useVideo = true;
 	let wakeLock: WakeLockSentinel | null = null;
-	let send = '';
+	let stearingStoreUnsubscribe: Unsubscriber;
 
 	async function connectToBLE() {
 		const con = await device.connect();
@@ -26,32 +27,30 @@
 		});
 	//
 
-	lastCommand.subscribe((c) => {
-		if (c) {
-			console.log('got command', c);
-			if (!BLEConnected) console.warn('command not sent, BLE not connected');
-			switch (c.key) {
-				case 'X': {
-					const { gear, direction, speed } = c.value as SearingStore;
-					const uint8array = new TextEncoder().encode('X' + gear + direction + 'P'); // P = placeholder for int speed);
-					uint8array[3] = speed;
-					device.leds.setValRaw(uint8array.buffer);
-					return;
-				}
-				case 'L': {
-					device.leds.setVal((c.value as boolean) ? '11' : '00'); // terrible interface fix this.
-					return;
-				}
-				case 'S': {
-					device.servo.setVal(c.value as number);
-					return;
-				}
-				default: {
-					console.warn('unknown command', c);
-					return;
-				}
-			}
+	stearingStoreUnsubscribe = stearingStore.subscribe((stearing) => {
+		if (stearingStoreUnsubscribe) stearingStoreUnsubscribe();
+		console.log('stearingStore upd:', stearing);
+		if (!BLEConnected) {
+			console.warn('command not sent, BLE not connected');
+			return;
 		}
+		const { gear, dir, speed } = stearing;
+		const uint8array = new TextEncoder().encode('X' + gear + dir + 'P'); // P = placeholder for int speed);
+		uint8array[3] = speed;
+		device.leds.setValRaw(uint8array.buffer); // its still called leds but will fix all stearing stuff
+		return;
+		// case 'L': {
+		// 	device.leds.setVal((c.value as boolean) ? '11' : '00'); // terrible interface fix this.
+		// 	return;
+		// }
+		// case 'S': {
+		// 	device.servo.setVal(c.value as number);
+		// 	return;
+		// }
+		// default: {
+		// 	console.warn('unknown command', c);
+		// 	return;
+		// }
 	});
 
 	$: {

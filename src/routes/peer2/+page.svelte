@@ -2,31 +2,19 @@
 	import SpeedControl from './SpeedControl.svelte';
 	import Gps from '$lib/components/gps/Gps.svelte';
 	import { peer2Store } from './peer2';
-	import { onKeyDown, onKeyUp, searingStore } from './stearing';
 	import Status from '$lib/components/Status.svelte';
+	import { onKeyDown, onKeyUp, stearingStore } from '$lib/stearingStore';
+	import type { Unsubscriber } from 'svelte/store';
 	// commands that can be forwarded to BLE device over dataConn
 
-	let send = '';
-	let data: string[] = [];
 	let video: HTMLVideoElement;
-	let command = $peer2Store.command;
 	let angle = 0;
+	let unsubscribe: Unsubscriber;
 	$: {
 		if ($peer2Store.mediaStream && video) {
 			video.srcObject = $peer2Store.mediaStream;
 		}
-		if ($peer2Store.dataConn) {
-			command = $peer2Store.command;
-		}
 	}
-	$: {
-		if (angle) {
-			command.setServo(1, angle);
-		}
-	}
-	searingStore.subscribe((stearing) => {
-		command.setStearing(stearing);
-	});
 </script>
 
 <svelte:head>
@@ -40,8 +28,6 @@
 			<h4>Connected to peer1</h4>
 		</div>
 
-		<button on:click={() => command.setLed(1, false)}>0</button>
-		<button on:click={() => command.setLed(1, true)}>1</button>
 		<input type="range" min="0" max="180" bind:value={angle} />
 
 		{#if !$peer2Store.mediaStream}

@@ -1,4 +1,3 @@
-import type { CommandList, SentCommand } from '$lib/commands';
 import {
 	bindDataConnectionToStore,
 	createPeerWithIceServers,
@@ -9,7 +8,8 @@ import {
 	type PeerStoreObj
 } from '$lib/peers';
 import { bindStatusStoreToConnUpStream } from '$lib/statusStore';
-import { writable, get, derived } from 'svelte/store';
+import { writable, get } from 'svelte/store';
+import { bindStearingStoreToConnDownStream } from '../../lib/stearingStore';
 
 const connectToP2 = async (store: PeerStore) => {
 	const peer = get(peer1Store).peer;
@@ -19,6 +19,7 @@ const connectToP2 = async (store: PeerStore) => {
 		// this only fires on peer1
 		bindDataConnectionToStore(dataConn, store);
 		bindStatusStoreToConnUpStream(dataConn);
+		bindStearingStoreToConnDownStream(dataConn);
 	});
 	dataConn.once('close', () => {
 		console.info('data connection closed calling p2 again...');
@@ -72,8 +73,4 @@ peer1Store.subscribe(({ peer, mediaStream, mediaConn }) => {
 		mediaConn.close();
 		peer1Store.update((s) => ({ ...s, mediaConn: null }));
 	}
-});
-
-export const lastCommand = derived(peer1Store, ($peer1Store) => {
-	return $peer1Store.lastCommand as any as SentCommand<keyof CommandList>;
 });

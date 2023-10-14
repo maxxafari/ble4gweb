@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { searingStore } from './stearing';
+	import { stearingStore } from '$lib/stearingStore';
+
 	let speed = 50;
 	let timer: NodeJS.Timeout | undefined = undefined;
 
@@ -17,7 +18,7 @@
 
 	$: {
 		debounce(() => {
-			$searingStore.speed = speed;
+			$stearingStore.speed = speed;
 		});
 	}
 </script>

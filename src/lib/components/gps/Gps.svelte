@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { statusStore } from '$lib/statusStore';
+	import type { Unsubscriber } from 'svelte/store';
 
 	import { loadMap } from './load';
 
@@ -8,6 +9,7 @@
 	let deviceMarker: google.maps.Marker | null = null;
 	let compass = $statusStore.compass;
 	let compassCorrection = 360 / 2;
+	let unsubscribe: Unsubscriber;
 
 	$: loadMap(container).then((gMap) => {
 		if (!gMap) return;
@@ -15,7 +17,8 @@
 		deviceMarker = gMap.deviceMarker;
 	});
 
-	statusStore.subscribe((s) => {
+	unsubscribe = statusStore.subscribe((s) => {
+		if (unsubscribe) unsubscribe();
 		if (map && deviceMarker) {
 			//deviceMarker.setPosition(s.gps);
 			if (s.gps.lat && s.gps.lng) {

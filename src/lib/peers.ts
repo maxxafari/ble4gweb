@@ -6,8 +6,8 @@ import type {
 } from 'peerjs';
 import { getIceServerList } from './iceServers';
 import { get, type Writable } from 'svelte/store';
-import { nonImplementedCommands, type Commands, bindCommands } from './commands';
-import { bindStatusStoreToConnDownStream, bindStatusStoreToConnUpStream } from './statusStore';
+import { bindStatusStoreToConnDownStream } from './statusStore';
+import { bindStearingStoreToConnUpStream } from './stearingStore';
 
 export const peer1Id = 'ble-controller-p1';
 export const peer2Id = 'ble-controller-p2';
@@ -23,8 +23,6 @@ export type PeerStoreObj = {
 	peer: PeerType | null;
 	dataConn: DataConnectionType | null;
 	mediaConn: MediaConnectionType | null;
-	lastCommand: object | null;
-	command: Commands;
 };
 
 export const emptyPeerStore = (key: PeerStoreKey): PeerStoreObj => ({
@@ -35,9 +33,7 @@ export const emptyPeerStore = (key: PeerStoreKey): PeerStoreObj => ({
 	open: false,
 	peer: null,
 	dataConn: null,
-	mediaConn: null,
-	lastCommand: null,
-	command: nonImplementedCommands
+	mediaConn: null
 });
 
 export type PeerStore = Writable<PeerStoreObj>;
@@ -80,6 +76,7 @@ const bindPeerToStore = (peer: PeerType, store: PeerStore) => {
 		bindDataConnectionToStore(conn, store);
 		if (key === 'peer2') {
 			bindStatusStoreToConnDownStream(conn);
+			bindStearingStoreToConnUpStream(conn);
 		}
 	});
 	peer.on('call', (mediaConn) => {
@@ -106,18 +103,14 @@ const bindPeerToStore = (peer: PeerType, store: PeerStore) => {
 export const bindDataConnectionToStore = (dataConn: DataConnectionType, store: PeerStore) => {
 	store.update((s): PeerStoreObj => {
 		console.log('bindCommands!');
-		const command = bindCommands(dataConn);
 		s.dataConn?.removeAllListeners();
 		s.dataConn?.close();
 
-		return { ...s, dataConn, command };
+		return { ...s, dataConn };
 	});
 
 	dataConn.on('data', (data) => {
 		console.info('dataConn gotData', data);
-		if (typeof data === 'object') {
-			store.update((s): PeerStoreObj => ({ ...s, lastCommand: data }));
-		}
 	});
 	dataConn.on('open', () => {
 		console.info('dataConn open!');
