@@ -35,6 +35,24 @@
 				compass
 			}));
 		}
+		if (typeof navigator.getBattery !== 'undefined') {
+			navigator
+				.getBattery()
+				.then(function (battery) {
+					console.log('battery1', battery.level);
+					$stat.phoneBattery = battery.level * 100;
+					battery.addEventListener('levelchange', function () {
+						// Do stuff when the level changes, you can get it
+						console.log('battery2', battery.level);
+						// from battery.level
+
+						$stat.phoneBattery = battery.level * 100;
+					});
+				})
+				.catch((e) => {
+					console.log('battery error', e);
+				});
+		}
 	}
 </script>
 
