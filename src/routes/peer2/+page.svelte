@@ -21,7 +21,7 @@
 	<title>Peer2</title>
 </svelte:head>
 <div>
-	{#if !$peer2Store.connected}
+	{#if !$peer2Store.dataConn?.open}
 		<p>Waiting for call (NOT initiator)</p>
 	{:else}
 		<div>

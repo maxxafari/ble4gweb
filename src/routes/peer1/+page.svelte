@@ -34,6 +34,7 @@
 			console.warn('command not sent, BLE not connected');
 			return;
 		}
+		console.info('sending command to BLE device');
 		const { gear, dir, speed } = stearing;
 		const uint8array = new TextEncoder().encode('X' + gear + dir + 'P'); // P = placeholder for int speed);
 		uint8array[3] = speed;
