@@ -1,6 +1,7 @@
 <script lang="ts">
+	import { device } from '$lib/device';
 	export let isSender = false;
-	import { statusStore as stat } from '../statusStore';
+	import { statusStore as stat, updStat } from '../statusStore';
 	import Battery from './Battery.svelte';
 	let compass: number | null = 0;
 	if (isSender) {
@@ -53,6 +54,11 @@
 					console.log('battery error', e);
 				});
 		}
+		device.battery.onNotification((percent) => {
+			console.log('percent', percent);
+
+			updStat({ bleBattery: parseInt(percent) });
+		});
 	}
 </script>
 
