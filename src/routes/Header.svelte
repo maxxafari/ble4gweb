@@ -1,13 +1,11 @@
 <script>
 	import { base } from '$app/paths';
 	import { page } from '$app/stores';
-	import QrCode from '$lib/components/QrCode.svelte';
+	import QrCode from '$lib/components/qr/QrCode.svelte';
 </script>
 
 <header>
-	<div class="corner">
-		<a href="https://kit.svelte.dev" />
-	</div>
+	<div class="corner" />
 
 	<nav>
 		<svg viewBox="0 0 2 3" aria-hidden="true">

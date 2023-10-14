@@ -1,5 +1,5 @@
 <script>
-	import QrCode from '$lib/components/QrCode.svelte';
+	import QrCode from '$lib/components/qr/QrCode.svelte';
 </script>
 
 <svelte:head>
