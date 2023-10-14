@@ -101,7 +101,7 @@
 	<p>Caller (initiator)</p>
 	<label for="use-video">Use video</label>
 	<input type="checkbox" id="use-video" bind:checked={useVideo} />
-	{#if !$peer1Store.connected}
+	{#if !$peer1Store.dataConn}
 		<div>
 			<h4>Calling peer2...</h4>
 		</div>
@@ -109,7 +109,7 @@
 	{#if $peer1Store.dataConn}
 		<div>
 			<h4>Connected to Peer2</h4>
-			<p>has dataConn: {$peer1Store.dataConn ? 'true' : 'false'}</p>
+			<p>steering: {$stearingStore.dir} {$stearingStore.gear} {$stearingStore.speed}</p>
 			<button on:click={() => $peer1Store.dataConn?.send({ message: 'ping!', date: new Date() })}
 				>Send data</button
 			>
