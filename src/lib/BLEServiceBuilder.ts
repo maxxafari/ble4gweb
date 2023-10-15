@@ -22,6 +22,7 @@ interface BLEServiceOptions<T> {
 
 export const createBleDevice = (bleServices: BLEService<any>[]) => {
 	let bleDevice: BluetoothDevice | undefined = undefined;
+	// todo fix this as a class or something
 	const connect = async () => {
 		bleDevice = await navigator.bluetooth.requestDevice({
 			filters: [{ namePrefix: 'nrf52' }],

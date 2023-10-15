@@ -10,7 +10,7 @@
 	let BLEConnected = false;
 	let useVideo = true;
 	let wakeLock: WakeLockSentinel | null = null;
-	let stearingStoreUnsubscribe: Unsubscriber;
+	let stearingStoreUnsubscribe: Unsubscriber | null = null;
 
 	async function connectToBLE() {
 		const con = await device.connect();
@@ -27,32 +27,33 @@
 		});
 	//
 
-	stearingStoreUnsubscribe = stearingStore.subscribe((stearing) => {
-		if (stearingStoreUnsubscribe) stearingStoreUnsubscribe();
-		console.log('stearingStore upd:', stearing);
-		if (!BLEConnected) {
-			console.warn('command not sent, BLE not connected');
+	if (!stearingStoreUnsubscribe)
+		stearingStoreUnsubscribe = stearingStore.subscribe((stearing) => {
+			// if (stearingStoreUnsubscribe) stearingStoreUnsubscribe(); this doent work ??
+			console.log('stearingStore upd:', stearing);
+			if (!BLEConnected) {
+				console.warn('command not sent, BLE not connected');
+				return;
+			}
+			console.info('sending command to BLE device');
+			const { gear, dir, speed } = stearing;
+			const uint8array = new TextEncoder().encode('X' + gear + dir + 'P'); // P = placeholder for int speed);
+			uint8array[3] = speed;
+			device.leds.setValRaw(uint8array.buffer); // its still called leds but will fix all stearing stuff
 			return;
-		}
-		console.info('sending command to BLE device');
-		const { gear, dir, speed } = stearing;
-		const uint8array = new TextEncoder().encode('X' + gear + dir + 'P'); // P = placeholder for int speed);
-		uint8array[3] = speed;
-		device.leds.setValRaw(uint8array.buffer); // its still called leds but will fix all stearing stuff
-		return;
-		// case 'L': {
-		// 	device.leds.setVal((c.value as boolean) ? '11' : '00'); // terrible interface fix this.
-		// 	return;
-		// }
-		// case 'S': {
-		// 	device.servo.setVal(c.value as number);
-		// 	return;
-		// }
-		// default: {
-		// 	console.warn('unknown command', c);
-		// 	return;
-		// }
-	});
+			// case 'L': {
+			// 	device.leds.setVal((c.value as boolean) ? '11' : '00'); // terrible interface fix this.
+			// 	return;
+			// }
+			// case 'S': {
+			// 	device.servo.setVal(c.value as number);
+			// 	return;
+			// }
+			// default: {
+			// 	console.warn('unknown command', c);
+			// 	return;
+			// }
+		});
 
 	$: {
 		if (useVideo) {
@@ -94,7 +95,7 @@
 	<div>
 		<p>BLE device</p>
 		{#if BLEConnected}
-			<p>Not connected</p>
+			<p>BLE connected</p>
 		{:else}
 			<button on:click={() => connectToBLE()}>Connect BLE</button>
 		{/if}

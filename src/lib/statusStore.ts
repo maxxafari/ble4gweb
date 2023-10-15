@@ -71,7 +71,6 @@ export const bindStatusStoreToConnUpStream = (conn: DataConnectionType) => {
 	});
 	// send initial data
 	const currentState = get(statusStore);
-	console.log('send', currentState);
 
 	conn.send(currentState);
 };

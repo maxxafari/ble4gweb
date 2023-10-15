@@ -9,7 +9,7 @@
 	let deviceMarker: google.maps.Marker | null = null;
 	let compass = $statusStore.compass;
 	let compassCorrection = 360 / 2;
-	let unsubscribe: Unsubscriber;
+	let unsubscribe: Unsubscriber | null = null;
 
 	$: loadMap(container).then((gMap) => {
 		if (!gMap) return;
@@ -17,16 +17,18 @@
 		deviceMarker = gMap.deviceMarker;
 	});
 
-	unsubscribe = statusStore.subscribe((s) => {
-		if (unsubscribe) unsubscribe();
-		if (map && deviceMarker) {
-			//deviceMarker.setPosition(s.gps);
-			if (s.gps.lat && s.gps.lng) {
-				map.setCenter({ lat: s.gps.lat, lng: s.gps.lng });
-				deviceMarker.setPosition({ lat: s.gps.lat, lng: s.gps.lng });
+	if (!unsubscribe)
+		unsubscribe = statusStore.subscribe((s) => {
+			const { lat, lng } = s.gps;
+
+			if (map && deviceMarker) {
+				//deviceMarker.setPosition(s.gps);
+				if (lat !== null && lng !== null) {
+					map.setCenter({ lat, lng });
+					deviceMarker.setPosition({ lat, lng });
+				}
 			}
-		}
-	});
+		});
 
 	function fixOrientation(deviceDegrees: number, offset: number) {
 		map?.setHeading(deviceDegrees + offset);
