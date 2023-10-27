@@ -5,6 +5,7 @@
 	import Status from '$lib/components/Status.svelte';
 	import { onKeyDown, onKeyUp, stearingStore } from '$lib/stearingStore';
 	import type { Unsubscriber } from 'svelte/store';
+	import GamePad from '$lib/components/joystick/GamePad.svelte';
 	// commands that can be forwarded to BLE device over dataConn
 
 	let video: HTMLVideoElement;
@@ -44,7 +45,7 @@
 	{/if}
 </div>
 
-<svelte:window on:keydown={onKeyDown} on:keyup={onKeyUp} />
+<GamePad />
 
 <style>
 	video {

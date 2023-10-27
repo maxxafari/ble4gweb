@@ -57,46 +57,6 @@ export const go = {
 	neutral: goNeutral,
 	stop: goStop
 };
-export function onKeyDown(e: KeyboardEvent) {
-	if (e.repeat) return;
-	switch (e.key) {
-		case 'ArrowUp':
-			e.preventDefault();
-			go.forward();
-			break;
-		case 'ArrowDown':
-			e.preventDefault();
-			go.reverse();
-			break;
-		case 'ArrowLeft':
-			e.preventDefault();
-			go.left();
-			break;
-		case 'ArrowRight':
-			e.preventDefault();
-			go.right();
-			break;
-		case ' ':
-			e.preventDefault();
-			go.stop();
-			break;
-	}
-}
-
-export function onKeyUp(e: KeyboardEvent) {
-	switch (e.key) {
-		case 'ArrowUp':
-		case 'ArrowDown':
-			e.preventDefault();
-			go.neutral();
-			break;
-		case 'ArrowLeft':
-		case 'ArrowRight':
-			e.preventDefault();
-			go.center();
-			break;
-	}
-}
 
 export const updSteer = (newData: Partial<StearingStoreObj>) => {
 	stearingStore.update((oldData) => ({ ...oldData, ...newData }));
