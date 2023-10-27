@@ -33,6 +33,9 @@ export const createBleDevice = (bleServices: BLEService<any>[]) => {
 		const bleServer = await bleDevice.gatt?.connect();
 		if (!bleServer) throw new Error('No connect to GATT server');
 		await bleServices.forEach(async (service) => await service.addServiceTo(bleServer));
+		bleDevice.addEventListener('gattserverdisconnected', (reason) => {
+			console.error('disconnected BLE', reason);
+		});
 		return true;
 	};
 

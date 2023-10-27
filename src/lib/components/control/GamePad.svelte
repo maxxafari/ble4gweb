@@ -1,4 +1,6 @@
 <script>
+	import { onMount } from 'svelte';
+
 	let poll;
 	export let ls = 0;
 	export let rs = 0;
@@ -9,7 +11,7 @@
 		let rx = axisMap.lx * 10;
 		let ry = axisMap.ly * 10;
 		let z = 1 - buttonMap.lstick * 0.05;
-		ls = (Math.round(axisMap.ly * 255 * 100) / 100) * -1;
+		ls = (Math.round(axisMap.ly * 254 * 100) / 100) * -1;
 		return `translateX(${x}%) translateY(${y}%) rotateY(${rx}deg) rotateX(${ry}deg) scale(${z})`;
 	};
 
@@ -19,7 +21,7 @@
 		let rx = axisMap.rx * 10;
 		let ry = axisMap.ry * 10;
 		let z = 1 - buttonMap.rstick * 0.05;
-		rs = (Math.round(axisMap.ry * 255 * 100) / 100) * -1;
+		rs = (Math.round(axisMap.ry * 254 * 100) / 100) * -1;
 		return `translateX(${x}%) translateY(${y}%) rotateY(${rx}deg) rotateX(${ry}deg) scale(${z})`;
 	};
 
@@ -104,6 +106,14 @@
 
 		poll = requestAnimationFrame(startController);
 	};
+	// on page reload call startController
+	onMount(async () => {
+		try {
+			startController();
+		} catch (e) {
+			console.log(e);
+		}
+	});
 </script>
 
 <svelte:window on:gamepadconnected={plugIn} on:gamepaddisconnected={unPlug} />

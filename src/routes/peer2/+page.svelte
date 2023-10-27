@@ -3,9 +3,8 @@
 	import Gps from '$lib/components/gps/Gps.svelte';
 	import { peer2Store } from './peer2';
 	import Status from '$lib/components/Status.svelte';
-	import { onKeyDown, onKeyUp, stearingStore } from '$lib/stearingStore';
 	import type { Unsubscriber } from 'svelte/store';
-	import GamePad from '$lib/components/joystick/GamePad.svelte';
+	import ControlWithStore from '$lib/components/control/ControlWithStore.svelte';
 	// commands that can be forwarded to BLE device over dataConn
 
 	let video: HTMLVideoElement;
@@ -45,7 +44,7 @@
 	{/if}
 </div>
 
-<GamePad />
+<ControlWithStore />
 
 <style>
 	video {

@@ -6,17 +6,15 @@ const storeKey = 'stear';
 
 export type StearingStoreObj = {
 	key: typeof storeKey;
-	gear: 'F' | 'R' | 'N';
-	speed: number;
-	dir: 'L' | 'R' | 'C';
+	lm: number;
+	rm: number;
 };
 type StearingStore = Writable<StearingStoreObj>;
 
 export const stearingStore: StearingStore = writable<StearingStoreObj>({
 	key: storeKey,
-	gear: 'N',
-	speed: 50,
-	dir: 'C'
+	lm: 0,
+	rm: 0
 });
 
 const isStearingStoreObj = (data: unknown): data is StearingStoreObj => {
@@ -24,38 +22,6 @@ const isStearingStoreObj = (data: unknown): data is StearingStoreObj => {
 		return true;
 	}
 	return false;
-};
-
-const goStop = () => {
-	updSteer({ gear: 'N' });
-};
-const goLeft = () => {
-	updSteer({ dir: 'L' });
-};
-const goRight = () => {
-	updSteer({ dir: 'R' });
-};
-const goCenter = () => {
-	updSteer({ dir: 'C' });
-};
-const goForward = () => {
-	updSteer({ gear: 'F' });
-};
-const goReverse = () => {
-	updSteer({ gear: 'R' });
-};
-const goNeutral = () => {
-	updSteer({ gear: 'N' });
-};
-
-export const go = {
-	left: goLeft,
-	right: goRight,
-	center: goCenter,
-	forward: goForward,
-	reverse: goReverse,
-	neutral: goNeutral,
-	stop: goStop
 };
 
 export const updSteer = (newData: Partial<StearingStoreObj>) => {
