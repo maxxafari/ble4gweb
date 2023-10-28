@@ -3,6 +3,7 @@
 	import Status from '$lib/components/Status.svelte';
 	import { device } from '$lib/device';
 	import { bindStearingToBle } from '$lib/transferToBle';
+	import { onMount } from 'svelte';
 
 	// BLE stuff
 	let BLEConnected = false;
@@ -10,10 +11,15 @@
 	let wakeLock: WakeLockSentinel | null = null;
 
 	async function connectToBLE() {
-		const con = await device.connect();
-		BLEConnected = con;
+		BLEConnected = await device.connect();
 	}
 	bindStearingToBle();
+	onMount(() => {
+		const interval = setInterval(() => {
+			BLEConnected = device.isConnected();
+		}, 500);
+		return () => clearInterval(interval);
+	});
 </script>
 
 <svelte:head>
@@ -21,8 +27,7 @@
 </svelte:head>
 <div>
 	<div>
-		<p>BLE device</p>
-		{#if device.isConnected()}
+		{#if BLEConnected}
 			<p>BLE connected</p>
 		{:else}
 			<button on:click={() => connectToBLE()}>Connect BLE</button>

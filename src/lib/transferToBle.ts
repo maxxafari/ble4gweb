@@ -8,7 +8,7 @@ let lastCommandSent = new Date().getTime();
 let timeOutId: NodeJS.Timeout | null = null;
 let latestValue: ArrayBufferLike;
 
-const throttleMs = 80;
+const throttleMs = 90;
 
 const throttleSendCommand = (valueToSend: ArrayBufferLike) => {
 	latestValue = valueToSend;
