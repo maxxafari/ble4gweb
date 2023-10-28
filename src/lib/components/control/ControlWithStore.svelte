@@ -5,14 +5,12 @@
 	let ls = 0;
 	let rs = 0;
 
-	$: () => {
-		updSteer({ lm: ls, rm: rs });
-	};
+	$: updSteer({ lm: ls, rm: rs });
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div>
-	<div>{ls} || {rs}</div>
+	<!-- <div>{ls} || {rs}</div> -->
 	<GamePad bind:ls bind:rs />
 </div>
 

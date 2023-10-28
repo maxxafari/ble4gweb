@@ -6,6 +6,7 @@
 	import { peer1Store } from './peer1';
 	import { stearingStore } from '$lib/stearingStore';
 	import type { Unsubscriber } from 'svelte/motion';
+	import { bindStearingToBle } from '$lib/transferToBle';
 
 	// BLE stuff
 	let BLEConnected = false;
@@ -27,26 +28,7 @@
 			console.log('wakeLock error', e);
 		});
 	//
-
-	if (!stearingStoreUnsubscribe)
-		// is this correct ??
-		stearingStoreUnsubscribe = stearingStore.subscribe((stearing) => {
-			// if (stearingStoreUnsubscribe) stearingStoreUnsubscribe(); this doent work...
-			console.log('stearingStore upd:', stearing);
-			if (!BLEConnected) {
-				console.warn('command not sent, BLE not connected');
-				return;
-			}
-			console.info('sending command to BLE device');
-			const { lm, rm } = stearing;
-			const uint8array = new TextEncoder().encode('X' + 'L' + 'R' + 'l' + 'r'); // placehoders fol values
-			uint8array[1] = Math.abs(lm); // left speed
-			uint8array[2] = Math.abs(rm); // right speed
-			uint8array[3] = lm < 0 ? 1 : 0; // left direction
-			uint8array[4] = rm < 0 ? 1 : 0; // right direction
-			device.leds.setValRaw(uint8array.buffer); // its still called leds but will fix all stearing stuff
-			return;
-		});
+	bindStearingToBle();
 
 	$: {
 		if (useVideo) {

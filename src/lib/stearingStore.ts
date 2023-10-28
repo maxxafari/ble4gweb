@@ -41,9 +41,9 @@ export const bindStearingStoreToConnDownStream = (conn: DataConnectionType) => {
 export const bindStearingStoreToConnUpStream = (conn: DataConnectionType) => {
 	console.log('bindStearingStoreToConnDownStream');
 	stearingStore.subscribe((data) => {
-		// debounce(() => {
+		// throttleSendCommand(conn)
+		// do not debounce but send with throttle
 		conn.send(data);
-		// });
 	});
 	// send initial data
 	const currentState = get(stearingStore);

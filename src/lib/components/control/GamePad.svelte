@@ -1,7 +1,8 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
 
-	let poll;
+	let poll: number = 0;
+	let gamePadConnected = false;
 	export let ls = 0;
 	export let rs = 0;
 
@@ -11,7 +12,7 @@
 		let rx = axisMap.lx * 10;
 		let ry = axisMap.ly * 10;
 		let z = 1 - buttonMap.lstick * 0.05;
-		ls = (Math.round(axisMap.ly * 254 * 100) / 100) * -1;
+		ls = Math.round(axisMap.ly * 254) * -1;
 		return `translateX(${x}%) translateY(${y}%) rotateY(${rx}deg) rotateX(${ry}deg) scale(${z})`;
 	};
 
@@ -21,11 +22,11 @@
 		let rx = axisMap.rx * 10;
 		let ry = axisMap.ry * 10;
 		let z = 1 - buttonMap.rstick * 0.05;
-		rs = (Math.round(axisMap.ry * 254 * 100) / 100) * -1;
+		rs = Math.round(axisMap.ry * 254) * -1;
 		return `translateX(${x}%) translateY(${y}%) rotateY(${rx}deg) rotateX(${ry}deg) scale(${z})`;
 	};
 
-	$: trigger = (side) => {
+	$: trigger = (side: 'rt' | 'lt') => {
 		let s = buttonMap[side];
 		let sx = side === 'rt' ? -s : s;
 		return `
@@ -34,7 +35,7 @@
 		`;
 	};
 
-	let buttonMap = {
+	const buttonMap = {
 		a: 0,
 		b: 0,
 		x: 0,
@@ -54,19 +55,23 @@
 		xbox: 0
 	};
 
-	let axisMap = {
+	const axisMap = {
 		lx: 0,
 		ly: 0,
 		rx: 0,
-		rx: 0
+		ry: 0
 	};
 
 	const plugIn = () => {
 		startController();
+		gamePadConnected = true;
+		console.log('GamePad connected');
 	};
 
 	const unPlug = () => {
 		cancelAnimationFrame(poll);
+		gamePadConnected = false;
+		console.log('GamePad lost connection');
 	};
 
 	const startController = () => {
@@ -96,11 +101,13 @@
 		];
 		const axes = ['lx', 'ly', 'rx', 'ry'];
 
-		pad.buttons.forEach((button, i) => {
+		pad?.buttons.forEach((button, i) => {
+			// @ts-ignore
 			buttonMap[buttons[i]] = button.pressed ? button.value : 0;
 		});
 
-		pad.axes.forEach((axis, i) => {
+		pad?.axes.forEach((axis, i) => {
+			// @ts-ignore
 			axisMap[axes[i]] = axis > 0.01 || axis < -0.01 ? parseFloat(axis.toFixed(3)) : 0;
 		});
 
@@ -116,11 +123,17 @@
 	});
 </script>
 
+<!-- svelte-ignore  -->
 <svelte:window on:gamepadconnected={plugIn} on:gamepaddisconnected={unPlug} />
-<div class="vals">
-	<div>{ls}</div>
-	<div>{rs}</div>
-</div>
+
+{#if gamePadConnected}
+	<span>Gamepad connected</span>
+	<div class="vals">
+		<div>{ls}</div>
+		<div>{rs}</div>
+	</div>
+{/if}
+
 <section class="controller">
 	<div class="pad" />
 	<div class="well left">
@@ -174,7 +187,7 @@
 	}
 
 	.pad {
-		background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/13471/xbox-controller.jpg');
+		background-image: url('/gamepad.jpg');
 		background-size: contain;
 		background-repeat: no-repeat;
 		background-position: center;
