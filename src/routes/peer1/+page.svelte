@@ -7,6 +7,7 @@
 	import { peer1Store } from './peer1';
 	import type { Unsubscriber } from 'svelte/motion';
 	import { bindStearingToBle } from '$lib/transferToBle';
+	import { onMount } from 'svelte';
 
 	// BLE stuff
 	let BLEConnected = false;
@@ -53,6 +54,12 @@
 			});
 		}
 	}
+	onMount(() => {
+		const interval = setInterval(() => {
+			BLEConnected = device.isConnected();
+		}, 500);
+		return () => clearInterval(interval);
+	});
 </script>
 
 <svelte:head>
