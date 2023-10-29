@@ -43,11 +43,11 @@ const servo = createBLEService<number>({
 	}
 });
 
-const ble = createBleDevice([leds, servo, battery]);
+const ble = createBleDevice([leds, battery]);
 
 export const device = {
 	...ble,
 	leds,
-	servo,
+	// servo,
 	battery
 };

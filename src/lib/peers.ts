@@ -8,6 +8,7 @@ import { getIceServerList } from './iceServers';
 import { get, type Writable } from 'svelte/store';
 import { bindStatusStoreToConnDownStream } from './statusStore';
 import { bindStearingStoreToConnUpStream } from './stearingStore';
+import { bindBtnStoreToConnUpStream } from './buttonStore';
 
 export const peer1Id = 'ble-controller-p1';
 export const peer2Id = 'ble-controller-p2';
@@ -71,12 +72,13 @@ const bindPeerToStore = (peer: PeerType, store: PeerStore) => {
 		store.update((s): PeerStoreObj => ({ ...s, open: true }));
 	});
 	peer.on('connection', (conn) => {
-		// this only fires for peer2 // use dataConn.once('open', for pper1
+		// this only fires for peer2 // use dataConn.once('open', for peer1
 		console.info('peer got connection');
 		bindDataConnectionToStore(conn, store);
 		if (key === 'peer2') {
 			bindStatusStoreToConnDownStream(conn);
 			bindStearingStoreToConnUpStream(conn);
+			bindBtnStoreToConnUpStream(conn);
 		}
 	});
 	peer.on('call', (mediaConn) => {

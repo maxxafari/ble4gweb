@@ -10,6 +10,7 @@ import {
 import { bindStatusStoreToConnUpStream } from '$lib/statusStore';
 import { writable, get } from 'svelte/store';
 import { bindStearingStoreToConnDownStream } from '../../lib/stearingStore';
+import { bindBtnStoreToConnDownStream } from '$lib/buttonStore';
 
 const connectToP2 = async (store: PeerStore) => {
 	const peer = get(peer1Store).peer;
@@ -20,6 +21,7 @@ const connectToP2 = async (store: PeerStore) => {
 		bindDataConnectionToStore(dataConn, store);
 		bindStatusStoreToConnUpStream(dataConn);
 		bindStearingStoreToConnDownStream(dataConn);
+		bindBtnStoreToConnDownStream(dataConn);
 	});
 	dataConn.once('close', () => {
 		console.info('data connection closed calling p2 again...');
