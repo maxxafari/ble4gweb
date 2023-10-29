@@ -24,8 +24,8 @@ const leds = createBLEService<string>({
 			const [blue, red] = data.split('').map((d) => parseInt(d));
 			return new Uint8Array([blue, red]);
 		} else {
-			const uint8array = new TextEncoder().encode('X' + data.gear + data.dir); //  + data.speed
-			return uint8array.buffer;
+			console.log('unhandled data setParser', data);
+			return new Uint8Array([0, 0]);
 		}
 	}
 });

@@ -22,6 +22,7 @@ interface BLEServiceOptions<T> {
 
 export const createBleDevice = (bleServices: BLEService<any>[]) => {
 	let bleDevice: BluetoothDevice | undefined = undefined;
+	let connected = false;
 	// todo fix this as a class or something
 	const connect = async () => {
 		bleDevice = await navigator.bluetooth.requestDevice({
@@ -33,6 +34,12 @@ export const createBleDevice = (bleServices: BLEService<any>[]) => {
 		const bleServer = await bleDevice.gatt?.connect();
 		if (!bleServer) throw new Error('No connect to GATT server');
 		await bleServices.forEach(async (service) => await service.addServiceTo(bleServer));
+		connected = true;
+		/* add listeners TODO: validate this on page refresh  */
+		bleDevice.addEventListener('gattserverdisconnected', (reason) => {
+			console.error('disconnected BLE', reason);
+			connected = false;
+		});
 		return true;
 	};
 
@@ -40,7 +47,12 @@ export const createBleDevice = (bleServices: BLEService<any>[]) => {
 		await bleDevice?.gatt?.disconnect();
 	};
 
+	const isConnected = () => {
+		return connected;
+	};
+
 	const ble = {
+		isConnected,
 		connect,
 		disconnect,
 		bleDevice

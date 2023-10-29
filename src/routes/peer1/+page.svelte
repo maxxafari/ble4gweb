@@ -1,10 +1,12 @@
 <script lang="ts">
+	import { preventScreenLock } from '$lib/utils';
+	import ControlWithStore from './../../lib/components/control/ControlWithStore.svelte';
 	import { device } from '$lib/device';
 	import Status from '$lib/components/Status.svelte';
 	import type { PeerStoreObj } from '$lib/peers';
 	import { peer1Store } from './peer1';
-	import { stearingStore } from '$lib/stearingStore';
 	import type { Unsubscriber } from 'svelte/motion';
+	import { bindStearingToBle } from '$lib/transferToBle';
 
 	// BLE stuff
 	let BLEConnected = false;
@@ -17,43 +19,8 @@
 		BLEConnected = con;
 	}
 
-	navigator.wakeLock
-		.request('screen')
-		.then((wl) => {
-			wakeLock = wl;
-		})
-		.catch((e) => {
-			console.log('wakeLock error', e);
-		});
-	//
-
-	if (!stearingStoreUnsubscribe)
-		stearingStoreUnsubscribe = stearingStore.subscribe((stearing) => {
-			// if (stearingStoreUnsubscribe) stearingStoreUnsubscribe(); this doent work ??
-			console.log('stearingStore upd:', stearing);
-			if (!BLEConnected) {
-				console.warn('command not sent, BLE not connected');
-				return;
-			}
-			console.info('sending command to BLE device');
-			const { gear, dir, speed } = stearing;
-			const uint8array = new TextEncoder().encode('X' + gear + dir + 'P'); // P = placeholder for int speed);
-			uint8array[3] = speed;
-			device.leds.setValRaw(uint8array.buffer); // its still called leds but will fix all stearing stuff
-			return;
-			// case 'L': {
-			// 	device.leds.setVal((c.value as boolean) ? '11' : '00'); // terrible interface fix this.
-			// 	return;
-			// }
-			// case 'S': {
-			// 	device.servo.setVal(c.value as number);
-			// 	return;
-			// }
-			// default: {
-			// 	console.warn('unknown command', c);
-			// 	return;
-			// }
-		});
+	preventScreenLock();
+	bindStearingToBle();
 
 	$: {
 		if (useVideo) {
@@ -111,13 +78,13 @@
 	{#if $peer1Store.dataConn}
 		<div>
 			<h4>Connected to Peer2</h4>
-			<p>steering: {$stearingStore.dir} {$stearingStore.gear} {$stearingStore.speed}</p>
 			<button on:click={() => $peer1Store.dataConn?.send({ message: 'ping!', date: new Date() })}
 				>Send data</button
 			>
 		</div>
 	{/if}
 	<Status isSender />
+	<ControlWithStore />
 </div>
 
 <style>
