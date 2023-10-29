@@ -1,5 +1,6 @@
 <script lang="ts">
 	import ControlWithStore from '$lib/components/control/ControlWithStore.svelte';
+	import Horn from '$lib/components/Horn.svelte';
 	import Status from '$lib/components/Status.svelte';
 	import { device } from '$lib/device';
 	import { bindStearingToBle } from '$lib/transferToBle';
@@ -38,6 +39,7 @@
 	</div>
 	<Status isSender />
 	<ControlWithStore />
+	<Horn />
 </div>
 
 <style>

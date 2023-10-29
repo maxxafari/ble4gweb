@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { preventScreenLock } from '$lib/utils';
-	import ControlWithStore from './../../lib/components/control/ControlWithStore.svelte';
+	import ControlWithStore from '$lib/components/control/ControlWithStore.svelte';
 	import { device } from '$lib/device';
 	import Status from '$lib/components/Status.svelte';
 	import type { PeerStoreObj } from '$lib/peers';
@@ -8,6 +8,7 @@
 	import type { Unsubscriber } from 'svelte/motion';
 	import { bindStearingToBle } from '$lib/transferToBle';
 	import { onMount } from 'svelte';
+	import Horn from '$lib/components/Horn.svelte';
 
 	// BLE stuff
 	let BLEConnected = false;
@@ -92,6 +93,7 @@
 	{/if}
 	<Status isSender />
 	<ControlWithStore />
+	<Horn />
 </div>
 
 <style>
