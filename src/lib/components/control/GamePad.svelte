@@ -1,10 +1,17 @@
 <script lang="ts">
+	import { btnPress } from '$lib/buttonStore';
 	import { onMount } from 'svelte';
 
 	let poll: number = 0;
 	let gamePadConnected = false;
 	export let ls = 0;
 	export let rs = 0;
+
+	const boundCommands = {
+		y: () => {
+			btnPress('horn', false);
+		}
+	};
 
 	$: stickl = () => {
 		let x = axisMap.lx * 25;
@@ -102,8 +109,16 @@
 		const axes = ['lx', 'ly', 'rx', 'ry'];
 
 		pad?.buttons.forEach((button, i) => {
+			const buttonName = buttons[i];
 			// @ts-ignore
 			buttonMap[buttons[i]] = button.pressed ? button.value : 0;
+
+			// this is fine
+			// @ts-ignore
+			if (boundCommands[buttonName] && button.pressed) {
+				// @ts-ignore
+				boundCommands[buttonName]();
+			}
 		});
 
 		pad?.axes.forEach((axis, i) => {
