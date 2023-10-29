@@ -1,37 +1,48 @@
 <script lang="ts">
-	/// <reference types="web-bluetooth" />
-	const serviceUUID = 'a3941db0-a97c-4cf1-943f-a25ff9ba40cd';
-	const ledCharacteristicUUID = '5b8c0ab6-a058-4684-b2b6-4a0a692e2d45';
+	import ControlWithStore from '$lib/components/control/ControlWithStore.svelte';
+	import Horn from '$lib/components/Horn.svelte';
+	import Lights from '$lib/components/Lights.svelte';
+	import Status from '$lib/components/Status.svelte';
+	import { device } from '$lib/device';
+	import { bindStearingToBle } from '$lib/transferToBle';
+	import { preventScreenLock } from '$lib/utils';
+	import { onMount } from 'svelte';
 
-	let bleDevice: BluetoothDevice;
-	let bleServer: BluetoothRemoteGATTServer;
-	let ledService: BluetoothRemoteGATTService;
-	let ledCharacteristic: BluetoothRemoteGATTCharacteristic;
+	// BLE stuff
+	let BLEConnected = false;
+	let useVideo = true;
+	let wakeLock: WakeLockSentinel | null = null;
 
 	async function connectToBLE() {
-		bleDevice = await navigator.bluetooth.requestDevice({
-			filters: [{ namePrefix: 'nrf52' }],
-			optionalServices: [serviceUUID]
-		});
-		if (!bleDevice.gatt) throw new Error('No GATT server');
-
-		bleServer = await bleDevice.gatt?.connect();
-		ledService = await bleServer?.getPrimaryService(serviceUUID);
-		ledCharacteristic = await ledService.getCharacteristic(ledCharacteristicUUID);
+		BLEConnected = await device.connect();
 	}
+
+	preventScreenLock();
+	bindStearingToBle();
+	onMount(() => {
+		const interval = setInterval(() => {
+			BLEConnected = device.isConnected();
+		}, 500);
+		return () => clearInterval(interval);
+	});
 </script>
 
 <svelte:head>
-	<title>Control</title>
-	<meta name="description" content="Control app" />
-	<ul>
-		<li>Led: {ledCharacteristic.readValue()}</li>
-	</ul>
+	<title>TEST BLE</title>
 </svelte:head>
-
-<section>
-	<button on:click={() => connectToBLE()}>Connect To Ble</button>
-</section>
+<div>
+	<div>
+		{#if BLEConnected}
+			<p>BLE connected</p>
+		{:else}
+			<button on:click={() => connectToBLE()}>Connect BLE</button>
+		{/if}
+	</div>
+	<Status isSender />
+	<ControlWithStore />
+	<Horn />
+	<Lights />
+</div>
 
 <style>
 </style>
