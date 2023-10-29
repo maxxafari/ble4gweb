@@ -1,10 +1,10 @@
 <script lang="ts">
+	import { preventScreenLock } from '$lib/utils';
 	import ControlWithStore from './../../lib/components/control/ControlWithStore.svelte';
 	import { device } from '$lib/device';
 	import Status from '$lib/components/Status.svelte';
 	import type { PeerStoreObj } from '$lib/peers';
 	import { peer1Store } from './peer1';
-	import { stearingStore } from '$lib/stearingStore';
 	import type { Unsubscriber } from 'svelte/motion';
 	import { bindStearingToBle } from '$lib/transferToBle';
 
@@ -19,15 +19,7 @@
 		BLEConnected = con;
 	}
 
-	navigator.wakeLock
-		.request('screen')
-		.then((wl) => {
-			wakeLock = wl;
-		})
-		.catch((e) => {
-			console.log('wakeLock error', e);
-		});
-	//
+	preventScreenLock();
 	bindStearingToBle();
 
 	$: {

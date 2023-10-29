@@ -3,6 +3,7 @@
 	import Status from '$lib/components/Status.svelte';
 	import { device } from '$lib/device';
 	import { bindStearingToBle } from '$lib/transferToBle';
+	import { preventScreenLock } from '$lib/utils';
 	import { onMount } from 'svelte';
 
 	// BLE stuff
@@ -13,6 +14,8 @@
 	async function connectToBLE() {
 		BLEConnected = await device.connect();
 	}
+
+	preventScreenLock();
 	bindStearingToBle();
 	onMount(() => {
 		const interval = setInterval(() => {
