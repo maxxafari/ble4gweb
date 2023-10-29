@@ -52,19 +52,18 @@ export const bindBtnStoreToConnUpStream = (conn: DataConnectionType) => {
 			conn.send(data);
 		});
 	});
-	// send initial data
-	const currentState = get(btnStore);
-
-	conn.send(currentState);
 };
 /* call when a button is pressed that should be synced to other device.
  * toggle should be true for example lights and false for horn
  */
 export const btnPress = (btnName: keyof BtnStore, toggle: boolean) => {
-	btnStore.update((oldData) => ({ ...oldData, [btnName]: true }));
-	if (!toggle) {
-		setTimeout(() => {
-			btnStore.update((oldData) => ({ ...oldData, [btnName]: true }));
-		}, 300);
-	}
+	console.log('btnPress!');
+	debounce(() => {
+		btnStore.update((oldData) => ({ ...oldData, [btnName]: !oldData[btnName] }));
+		if (!toggle) {
+			setTimeout(() => {
+				btnStore.update((oldData) => ({ ...oldData, [btnName]: false }));
+			}, 100);
+		}
+	});
 };

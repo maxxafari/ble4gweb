@@ -9,6 +9,7 @@
 	import { bindStearingToBle } from '$lib/transferToBle';
 	import { onMount } from 'svelte';
 	import Horn from '$lib/components/Horn.svelte';
+	import Lights from '$lib/components/Lights.svelte';
 
 	// BLE stuff
 	let BLEConnected = false;
@@ -94,6 +95,7 @@
 	<Status isSender />
 	<ControlWithStore />
 	<Horn />
+	<Lights />
 </div>
 
 <style>

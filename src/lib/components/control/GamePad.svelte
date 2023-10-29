@@ -10,6 +10,9 @@
 	const boundCommands = {
 		y: () => {
 			btnPress('horn', false);
+		},
+		x: () => {
+			btnPress('lights', true);
 		}
 	};
 
