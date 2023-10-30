@@ -38,13 +38,12 @@
 		}
 		if (typeof navigator.getBattery !== 'undefined') {
 			navigator
+				//ts-ignore
 				.getBattery()
 				.then(function (battery) {
-					console.log('battery1', battery.level);
 					$stat.phoneBattery = battery.level * 100;
 					battery.addEventListener('levelchange', function () {
 						// Do stuff when the level changes, you can get it
-						console.log('battery2', battery.level);
 						// from battery.level
 
 						$stat.phoneBattery = battery.level * 100;
@@ -55,8 +54,6 @@
 				});
 		}
 		device.battery.onNotification((percent) => {
-			console.log('percent', percent);
-
 			updStat({ bleBattery: parseInt(percent) });
 		});
 	}

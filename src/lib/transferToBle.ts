@@ -13,7 +13,6 @@ const throttleMs = 90;
 const throttleSendCommand = (valueToSend: ArrayBufferLike) => {
 	latestValue = valueToSend;
 	const now = new Date().getTime();
-	console.log('timeOut', timeOutId);
 
 	if (now > lastCommandSent + throttleMs) {
 		// fist command or long since last command
