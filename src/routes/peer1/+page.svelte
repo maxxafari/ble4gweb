@@ -1,26 +1,16 @@
 <script lang="ts">
+	import ConnectBle from './../../lib/components/ConnectBle.svelte';
 	import { preventScreenLock } from '$lib/utils';
 	import ControlWithStore from '$lib/components/control/ControlWithStore.svelte';
-	import { device } from '$lib/device';
 	import Status from '$lib/components/Status.svelte';
 	import type { PeerStoreObj } from '$lib/peers';
 	import { peer1Store } from './peer1';
-	import type { Unsubscriber } from 'svelte/motion';
 	import { bindStearingToBle } from '$lib/transferToBle';
-	import { onMount } from 'svelte';
 	import Horn from '$lib/components/Horn.svelte';
 	import Lights from '$lib/components/Lights.svelte';
 
-	// BLE stuff
 	let BLEConnected = false;
-	let useVideo = true;
-	let wakeLock: WakeLockSentinel | null = null;
-	let stearingStoreUnsubscribe: Unsubscriber | null = null;
-
-	async function connectToBLE() {
-		const con = await device.connect();
-		BLEConnected = con;
-	}
+	let useVideo = false;
 
 	preventScreenLock();
 	bindStearingToBle();
@@ -56,26 +46,13 @@
 			});
 		}
 	}
-	onMount(() => {
-		const interval = setInterval(() => {
-			BLEConnected = device.isConnected();
-		}, 500);
-		return () => clearInterval(interval);
-	});
 </script>
 
 <svelte:head>
 	<title>Peer1</title>
 </svelte:head>
 <div>
-	<div>
-		<p>BLE device</p>
-		{#if BLEConnected}
-			<p>BLE connected</p>
-		{:else}
-			<button on:click={() => connectToBLE()}>Connect BLE</button>
-		{/if}
-	</div>
+	<ConnectBle />
 	<p>Caller (initiator)</p>
 	<label for="use-video">Use video</label>
 	<input type="checkbox" id="use-video" bind:checked={useVideo} />
