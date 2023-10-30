@@ -111,9 +111,6 @@ export const bindDataConnectionToStore = (dataConn: DataConnectionType, store: P
 		return { ...s, dataConn };
 	});
 
-	dataConn.on('data', (data) => {
-		console.info('dataConn gotData', data);
-	});
 	dataConn.on('open', () => {
 		console.info('dataConn open!');
 		store.update((s): PeerStoreObj => ({ ...s, connected: true }));

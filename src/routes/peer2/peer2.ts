@@ -7,8 +7,6 @@ import {
 } from '$lib/peers';
 import { writable } from 'svelte/store';
 
-export const lastMessage = writable<string>('');
-
 export const createPeer2 = async (store: PeerStore) => {
 	console.info('Creating new peer2');
 	await createPeerWithIceServers(peer2Id, store);
