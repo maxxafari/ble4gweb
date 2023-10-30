@@ -18,7 +18,7 @@
 </script>
 
 <div class="ble">
-	<p>Bluetooth vehicle</p>
+	<span>Bluetooth vehicle</span>
 	{#if BLEConnected}
 		<span> 🟢 Connected</span>
 	{:else}

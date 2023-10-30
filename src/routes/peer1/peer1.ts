@@ -15,8 +15,14 @@ import { bindBtnStoreToConnDownStream } from '$lib/buttonStore';
 const connectToP2 = async (store: PeerStore) => {
 	const peer = get(peer1Store).peer;
 	if (!peer) throw new Error('Peer is null when calling p2');
+	if (peer.disconnected) {
+		console.warn('Disconnected from web-RTC server, reconnecting');
+		peer.reconnect();
+		return;
+	}
 	const dataConn = peer.connect(peer2Id);
 	dataConn.once('open', () => {
+		console.info('Web-RTC call is open');
 		// this only fires on peer1
 		bindDataConnectionToStore(dataConn, store);
 		bindStatusStoreToConnUpStream(dataConn);
@@ -24,7 +30,8 @@ const connectToP2 = async (store: PeerStore) => {
 		bindBtnStoreToConnDownStream(dataConn);
 	});
 	dataConn.once('close', () => {
-		console.info('data connection closed calling p2 again...');
+		console.info('Web-RTC call closed calling peer2 again...');
+		dataConn.removeAllListeners();
 		connectToP2(store);
 	});
 	setTimeout(() => {
@@ -43,11 +50,12 @@ export const createPeer1 = async (store: PeerStore) => {
 	await createPeerWithIceServers(peer1Id, store);
 	const peer = get(store).peer;
 	if (!peer) throw new Error('Peer is null when calling p2');
-	// add unique error handlers for peer1
 	peer?.on('error', (err) => {
 		if (err.type === 'peer-unavailable') {
 			// this fires 8 times on one connect...
-			console.log('peer unavailable');
+			console.log('webRTC peer not available', err);
+		} else {
+			console.error('peerjs Peer error', { err });
 		}
 	});
 	peer?.once('open', () => {
@@ -55,19 +63,12 @@ export const createPeer1 = async (store: PeerStore) => {
 	});
 };
 
-export const lastMessage = writable<string>('');
-
-export const peer1Store: PeerStore = writable<PeerStoreObj>(emptyPeerStore('peer1'), () => {
-	console.info('new subscription for peer1');
-	if (get(peer1Store).peer === null) createPeer1(peer1Store);
-	return () => {
-		console.info('No subscription  peer1');
-	};
-});
+export const peer1Store: PeerStore = writable<PeerStoreObj>(emptyPeerStore('peer1'));
 
 peer1Store.subscribe(({ peer, mediaStream, mediaConn }) => {
+	/* update media stream */
 	if (mediaStream && peer && !mediaConn) {
-		console.log('mediaStream changed');
+		console.log('mediaStream added');
 		const newMediaConn = peer?.call(peer2Id, mediaStream);
 		peer1Store.update((s) => ({ ...s, mediaConn: newMediaConn }));
 	} else if (!mediaStream && mediaConn) {

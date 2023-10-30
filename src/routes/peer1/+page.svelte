@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { device } from '$lib/device';
 	import ConnectBle from './../../lib/components/ConnectBle.svelte';
 	import { preventScreenLock } from '$lib/utils';
 	import ControlWithStore from '$lib/components/control/ControlWithStore.svelte';
@@ -8,12 +9,16 @@
 	import { bindStearingToBle } from '$lib/transferToBle';
 	import Horn from '$lib/components/Horn.svelte';
 	import Lights from '$lib/components/Lights.svelte';
+	import ConnectRtc from './ConnectRTC.svelte';
+	import { onMount } from 'svelte';
 
-	let BLEConnected = false;
 	let useVideo = false;
 
-	preventScreenLock();
-	bindStearingToBle();
+	onMount(() => {
+		preventScreenLock();
+		return bindStearingToBle();
+		// how to do with multiple returns
+	});
 
 	$: {
 		if (useVideo) {
@@ -52,15 +57,12 @@
 	<title>Peer1</title>
 </svelte:head>
 <div>
+	<h3>Open this page on vehicle device</h3>
 	<ConnectBle />
-	<p>Caller (initiator)</p>
+	<ConnectRtc />
 	<label for="use-video">Use video</label>
 	<input type="checkbox" id="use-video" bind:checked={useVideo} />
-	{#if !$peer1Store.dataConn}
-		<div>
-			<h4>Calling peer2...</h4>
-		</div>
-	{/if}
+
 	{#if $peer1Store.dataConn}
 		<div>
 			<h4>Connected to Peer2</h4>

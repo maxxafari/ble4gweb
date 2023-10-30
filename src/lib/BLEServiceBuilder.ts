@@ -68,17 +68,17 @@ export const createBLEService = <T>(options: BLEServiceOptions<T>): BLEService<T
 	const addServiceTo = async (new_bleServer: BluetoothRemoteGATTServer) => {
 		bleServer = new_bleServer;
 		if (!bleServer.connected) throw new Error('BLE Server not connected');
-		console.info('getPrimaryService', serviceId);
+		// console.info('getPrimaryService', serviceId);
 		const service = await bleServer.getPrimaryService(serviceId);
-		console.log('got primary service', serviceId);
+		// console.log('got primary service', serviceId);
 		characteristic = await service.getCharacteristic(characteristicId);
-		console.log('connected to: ', { name });
+		// console.log('connected to: ', { name });
 		if (options.isNotifiable) {
-			console.log('add notification for: ', options.characteristicId);
+			// console.log('add notification for: ', options.characteristicId);
 			await characteristic.startNotifications();
 			characteristic.addEventListener('characteristicvaluechanged', (event) => {
 				const target = event.target as BluetoothRemoteGATTCharacteristic;
-				console.log('event', { name, event });
+				// console.debug('event', { name, event });
 
 				if (!readParser) throw new Error('readParser not defined');
 				if (target.value) {

@@ -21,7 +21,7 @@ export type PeerStoreObj = {
 	connected: boolean;
 	open: boolean;
 	mediaStream: MediaStream | null;
-	peer: PeerType | null;
+	peer: PeerType | undefined;
 	dataConn: DataConnectionType | null;
 	mediaConn: MediaConnectionType | null;
 };
@@ -32,7 +32,7 @@ export const emptyPeerStore = (key: PeerStoreKey): PeerStoreObj => ({
 	connected: false,
 	mediaStream: null,
 	open: false,
-	peer: null,
+	peer: undefined,
 	dataConn: null,
 	mediaConn: null
 });

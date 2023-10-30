@@ -6,9 +6,13 @@
 	import Status from '$lib/components/Status.svelte';
 	import { bindStearingToBle } from '$lib/transferToBle';
 	import { preventScreenLock } from '$lib/utils';
+	import { onMount } from 'svelte';
 
 	preventScreenLock();
-	bindStearingToBle();
+	onMount(() => {
+		return bindStearingToBle();
+		// how to do with multiple returns
+	});
 </script>
 
 <svelte:head>
