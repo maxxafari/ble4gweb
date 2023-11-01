@@ -4,6 +4,7 @@
 
 	let poll: number = 0;
 	let gamePadConnected = false;
+	const speedSteps = 254;
 	export let ls = 0;
 	export let rs = 0;
 
@@ -13,6 +14,9 @@
 		},
 		x: () => {
 			btnPress('lights', true);
+		},
+		lt: () => {
+			btnPress('speedMode', true);
 		}
 	};
 
@@ -22,7 +26,7 @@
 		let rx = axisMap.lx * 10;
 		let ry = axisMap.ly * 10;
 		let z = 1 - buttonMap.lstick * 0.05;
-		ls = Math.round(axisMap.ly * 254) * -1;
+		ls = Math.round(axisMap.ly * speedSteps) * -1;
 		return `translateX(${x}%) translateY(${y}%) rotateY(${rx}deg) rotateX(${ry}deg) scale(${z})`;
 	};
 
@@ -32,7 +36,7 @@
 		let rx = axisMap.rx * 10;
 		let ry = axisMap.ry * 10;
 		let z = 1 - buttonMap.rstick * 0.05;
-		rs = Math.round(axisMap.ry * 254) * -1;
+		rs = Math.round((Math.tan(axisMap.rx) / (Math.PI / 2)) * speedSteps);
 		return `translateX(${x}%) translateY(${y}%) rotateY(${rx}deg) rotateX(${ry}deg) scale(${z})`;
 	};
 
@@ -85,6 +89,7 @@
 	};
 
 	const startController = () => {
+		// runs on animation frame
 		const gamepads = navigator.getGamepads();
 		if (!gamepads) {
 			return;
@@ -113,14 +118,18 @@
 
 		pad?.buttons.forEach((button, i) => {
 			const buttonName = buttons[i];
-			// @ts-ignore
-			buttonMap[buttons[i]] = button.pressed ? button.value : 0;
-
-			// this is fine
-			// @ts-ignore
-			if (boundCommands[buttonName] && button.pressed) {
+			if (button.pressed) {
 				// @ts-ignore
-				boundCommands[buttonName]();
+				buttonMap[buttons[i]] = button.value;
+				// @ts-ignore
+				if (boundCommands[buttonName]) {
+					// @ts-ignore
+					boundCommands[buttonName]();
+				}
+				if (!gamePadConnected) gamePadConnected = true;
+			} else {
+				// @ts-ignore
+				buttonMap[buttons[i]] = 0;
 			}
 		});
 
@@ -148,11 +157,12 @@
 	<span>Gamepad connected</span>
 	<div class="vals">
 		<div>{ls}</div>
+		<div>{axisMap.rx}</div>
 		<div>{rs}</div>
 	</div>
 {/if}
 
-<section class="controller">
+<section class="controller" class:connected={gamePadConnected}>
 	<div class="pad" />
 	<div class="well left">
 		<div class="stick" class:click={buttonMap.lstick} style="transform: {stickl()};" />
@@ -189,6 +199,10 @@
 	.controller {
 		position: relative;
 		width: 80%;
+		opacity: 0.2;
+	}
+	.controller.connected {
+		opacity: 1;
 	}
 
 	.controller > * {

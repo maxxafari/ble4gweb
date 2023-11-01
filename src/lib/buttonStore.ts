@@ -1,4 +1,4 @@
-import { get, writable, type Writable } from 'svelte/store';
+import { writable, type Writable } from 'svelte/store';
 import type { DataConnection as DataConnectionType } from 'peerjs';
 
 const storeKey = 'btn';
@@ -7,12 +7,14 @@ export type BtnStore = {
 	key: typeof storeKey;
 	horn: boolean;
 	lights: boolean;
+	speedMode: boolean;
 };
 
 export const btnStore: Writable<BtnStore> = writable({
 	key: storeKey,
 	horn: false,
-	lights: false
+	lights: false,
+	speedMode: false
 });
 let timer: NodeJS.Timeout;
 type CB = () => void;

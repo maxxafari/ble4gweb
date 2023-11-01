@@ -2,17 +2,28 @@
 <script lang="ts">
 	import { updSteer } from '$lib/stearingStore';
 	import GamePad from './GamePad.svelte';
+	const maxSpeed = 254;
+	const controllerDeadPoint = 11;
 	let ls = 0;
 	let rs = 0;
 	let lsFilter = 0;
 	let rsFilter = 0;
 	function filterMinimumInput(lsRaw: number, rsRaw: number) {
-		if (lsRaw < 11 && lsRaw > -11) lsFilter = 0;
+		// filter controller dead point
+		if (lsRaw < controllerDeadPoint && lsRaw > -controllerDeadPoint) lsFilter = 0;
 		else lsFilter = lsRaw;
-		if (rsRaw < 11 && rsRaw > -11) rsFilter = 0;
+		if (rsRaw < controllerDeadPoint && rsRaw > -controllerDeadPoint) rsFilter = 0;
 		else rsFilter = rsRaw;
+		// add stearing correction to motor speed
+		let lSpeed = lsFilter;
+		let rSpeed = lsFilter;
+		lSpeed = lSpeed + rsFilter;
+		rSpeed = rSpeed - rsFilter;
+		// limit max speed on motors speed + stearing can overflow max speed
+		if (lSpeed > maxSpeed) lSpeed = maxSpeed;
+		if (rSpeed > maxSpeed) rSpeed = maxSpeed;
 
-		updSteer({ lm: lsFilter, rm: rsFilter });
+		updSteer({ lm: lSpeed, rm: rSpeed });
 	}
 	$: filterMinimumInput(ls, rs);
 </script>
