@@ -1,20 +1,23 @@
 <script>
 	import { onMount } from 'svelte';
 	import { peer1Store, createPeer1 } from './peer1';
-	let connected = false;
-	let connecting = false;
+	let connectingToServer = false;
+	let connectedToServer = false;
+	let connectedToDriver = $peer1Store.dataConn;
 	function startRTC() {
-		connecting = true;
+		connectingToServer = true;
 		createPeer1(peer1Store);
 	}
 	onMount(() => {
 		const interval = setInterval(() => {
 			if ($peer1Store.peer) {
-				connected = !$peer1Store.peer.disconnected;
+				connectedToServer = !$peer1Store.peer.disconnected;
 			} else {
-				connected = false;
+				connectedToServer = false;
 			}
-		}, 1000);
+			connectedToDriver = $peer1Store.dataConn;
+			$peer1Store.dataConn?.send('ping');
+		}, 2000);
 		return () => {
 			clearInterval(interval);
 		};
@@ -22,9 +25,10 @@
 </script>
 
 <div>
-	{#if connecting || connected}
+	{#if connectingToServer || connectedToServer}
 		<ul>
 			<li>Web-RTC server {$peer1Store.open ? '🟢' : '🔴'}</li>
+			<!-- // this does not work. dataConn remains open , use polling -->
 			<li>Driver {$peer1Store.dataConn ? '🟢' : '🔴'}</li>
 		</ul>
 	{:else}

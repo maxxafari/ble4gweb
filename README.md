@@ -46,13 +46,17 @@ TODO:
 - add x box controller! 🎉 ✅
 - fix disable drive on no command or disconnect. todo on BLE decive not here...
 - hold command for more than 0.5s // will not happend with gamepad ever...
-- fix page unresponsive on mobile IDK why
-
 - add horn and lights ✅
-- add speed modes
-  better stearing:
-- use right stick to set diff between left and right motor speed for stearing and use left stick to set speed
 
+## controller & car related
+
+- use right stick to set diff between left and right motor speed for stearing and use left stick to set speed
+- add speed modes
+
+## pper 2 peer related
+
+- fix page unresponsive on mobile IDK why
+- fix polling system between peers
 - fix compass value being 0 always
 - fix device orientation not working on mobile -> map
 - refactor ble device since types are messed up. class ? or return device on connect. why did i want to do this ?

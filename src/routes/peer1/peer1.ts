@@ -34,6 +34,9 @@ const connectToP2 = async (store: PeerStore) => {
 		dataConn.removeAllListeners();
 		connectToP2(store);
 	});
+	dataConn.on('error', (err) => {
+		console.error('p1 dataConn error', { err });
+	});
 	setTimeout(() => {
 		// see if peer2 is connected if not try again
 		console.info('checking if peer2 is connected: ', dataConn.peerConnection?.connectionState);

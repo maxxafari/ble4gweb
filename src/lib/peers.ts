@@ -114,7 +114,15 @@ export const bindDataConnectionToStore = (dataConn: DataConnectionType, store: P
 	dataConn.on('open', () => {
 		console.info('dataConn open!');
 		store.update((s): PeerStoreObj => ({ ...s, connected: true }));
-		dataConn.send('hello!');
+	});
+	dataConn.on('data', (data) => {
+		// TODO: close connection if no response
+		if (data === 'ping') {
+			console.log('ping');
+			dataConn.send('pong');
+		} else if (data === 'pong') {
+			console.log('pong');
+		}
 	});
 	dataConn.on('close', () => {
 		console.info('dataConn closed');
