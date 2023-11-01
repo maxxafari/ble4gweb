@@ -4,9 +4,21 @@
 
 	let poll: number = 0;
 	let gamePadConnected = false;
-	const speedSteps = 254;
+	const speedResolution = 254;
+	const controllerDeadPoint = 0.05;
+
+	const scaleCorrection = speedResolution * 0.05 * Math.PI;
+
 	export let ls = 0;
 	export let rs = 0;
+
+	function tanCurve(x: number) {
+		if (x < controllerDeadPoint && x > -controllerDeadPoint) return 0;
+		// subtract deadpoint from x
+		x = x > 0 ? x - controllerDeadPoint : x + controllerDeadPoint;
+
+		return Math.floor((Math.tan(x) / (Math.PI / 2)) * (speedResolution + scaleCorrection));
+	}
 
 	const boundCommands = {
 		y: () => {
@@ -26,7 +38,7 @@
 		let rx = axisMap.lx * 10;
 		let ry = axisMap.ly * 10;
 		let z = 1 - buttonMap.lstick * 0.05;
-		ls = Math.round(axisMap.ly * speedSteps);
+		ls = tanCurve(axisMap.ly);
 		return `translateX(${x}%) translateY(${y}%) rotateY(${rx}deg) rotateX(${ry}deg) scale(${z})`;
 	};
 
@@ -36,7 +48,7 @@
 		let rx = axisMap.rx * 10;
 		let ry = axisMap.ry * 10;
 		let z = 1 - buttonMap.rstick * 0.05;
-		rs = Math.round((Math.tan(axisMap.rx) / (Math.PI / 2)) * speedSteps);
+		rs = tanCurve(axisMap.rx);
 		return `translateX(${x}%) translateY(${y}%) rotateY(${rx}deg) rotateX(${ry}deg) scale(${z})`;
 	};
 
@@ -156,9 +168,8 @@
 {#if gamePadConnected}
 	<span>Gamepad connected</span>
 	<div class="vals">
-		<div>{ls}</div>
+		<div>{axisMap.ly}</div>
 		<div>{axisMap.rx}</div>
-		<div>{rs}</div>
 	</div>
 {/if}
 
