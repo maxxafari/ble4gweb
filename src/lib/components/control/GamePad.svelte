@@ -26,7 +26,7 @@
 		let rx = axisMap.lx * 10;
 		let ry = axisMap.ly * 10;
 		let z = 1 - buttonMap.lstick * 0.05;
-		ls = Math.round(axisMap.ly * speedSteps) * -1;
+		ls = Math.round(axisMap.ly * speedSteps);
 		return `translateX(${x}%) translateY(${y}%) rotateY(${rx}deg) rotateX(${ry}deg) scale(${z})`;
 	};
 
