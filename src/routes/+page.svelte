@@ -19,6 +19,7 @@
 	<title>TEST BLE</title>
 </svelte:head>
 <div>
+	<span>3.76</span>
 	<ConnectBle />
 	<Status isSender />
 	<ControlWithStore />
