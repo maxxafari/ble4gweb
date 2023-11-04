@@ -4,7 +4,7 @@
 
 	let poll: number = 0;
 	let gamePadConnected = false;
-	const speedResolution = 254;
+	const speedResolution = 254; // 20 is good for inddors 254 for outdoors
 	const controllerDeadPoint = 0.05;
 
 	const scaleCorrection = speedResolution * 0.05 * Math.PI;
@@ -37,7 +37,7 @@
 		let y = axisMap.ly * 25;
 		let rx = axisMap.lx * 10;
 		let ry = axisMap.ly * 10;
-		let z = 1 - buttonMap.lstick * 0.05;
+		let z = 1 - buttonMap.lstick * 0.05 * -1;
 		ls = tanCurve(axisMap.ly);
 		return `translateX(${x}%) translateY(${y}%) rotateY(${rx}deg) rotateX(${ry}deg) scale(${z})`;
 	};

@@ -9,6 +9,16 @@
 		// add stearing correction to motor speed
 		let lSpeed = ls + rs;
 		let rSpeed = ls - rs;
+		// this should work for backwards driving...
+		/* 		let lSpeed = ls;
+		let rSpeed = ls;
+		if (ls >= 0) {
+			lSpeed + rs;
+			rSpeed - rs;
+		} else {
+			lSpeed - rs;
+			rSpeed + rs;
+		} */
 		if (lSpeed > maxSpeed) lSpeed = maxSpeed;
 		if (rSpeed > maxSpeed) rSpeed = maxSpeed;
 		if (lSpeed < -maxSpeed) lSpeed = -maxSpeed;
