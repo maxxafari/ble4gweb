@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { btnPress } from '$lib/buttonStore';
+	import { btnPress, btnStore } from '$lib/buttonStore';
 	import { onMount } from 'svelte';
 
 	let poll: number = 0;
 	let gamePadConnected = false;
-	const speedResolution = 254; // 20 is good for inddors 254 for outdoors
+	let speedResolution = $btnStore.maxSpeed; // 20 is good for inddors 254 for outdoors
 	const controllerDeadPoint = 0.05;
 
 	const scaleCorrection = speedResolution * 0.05 * Math.PI;
@@ -37,8 +37,8 @@
 		let y = axisMap.ly * 25;
 		let rx = axisMap.lx * 10;
 		let ry = axisMap.ly * 10;
-		let z = 1 - buttonMap.lstick * 0.05 * -1;
-		ls = tanCurve(axisMap.ly);
+		let z = 1 - buttonMap.lstick * 0.05;
+		ls = tanCurve(axisMap.ly) * -1;
 		return `translateX(${x}%) translateY(${y}%) rotateY(${rx}deg) rotateX(${ry}deg) scale(${z})`;
 	};
 

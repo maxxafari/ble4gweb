@@ -8,13 +8,15 @@ export type BtnStore = {
 	horn: boolean;
 	lights: boolean;
 	speedMode: boolean;
+	maxSpeed: number;
 };
 
 export const btnStore: Writable<BtnStore> = writable({
 	key: storeKey,
 	horn: false,
 	lights: false,
-	speedMode: false
+	speedMode: false,
+	maxSpeed: 15
 });
 let timer: NodeJS.Timeout;
 type CB = () => void;

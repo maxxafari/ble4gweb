@@ -1,8 +1,9 @@
 <!-- svelte component that controls the direction of a car with keyboard keys  -->
 <script lang="ts">
+	import { btnStore } from '$lib/buttonStore';
 	import { updSteer, stearingStore } from '$lib/stearingStore';
 	import GamePad from './GamePad.svelte';
-	const maxSpeed = 254;
+	let maxSpeed = $btnStore.maxSpeed;
 	let ls = 0;
 	let rs = 0;
 	function mapSpeedAndDirection(ls: number, rs: number) {
