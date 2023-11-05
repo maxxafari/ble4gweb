@@ -2,22 +2,36 @@
 	import { btnPress, btnStore } from '$lib/buttonStore';
 	import { onMount } from 'svelte';
 
+	const controllerDeadPoint = 0.05;
+	const absoluteMaxSpeed = 254;
+
 	let poll: number = 0;
 	let gamePadConnected = false;
-	let speedResolution = $btnStore.maxSpeed; // 20 is good for inddors 254 for outdoors
-	const controllerDeadPoint = 0.05;
-
-	const scaleCorrection = speedResolution * 0.05 * Math.PI;
+	let maxSpeed = $btnStore.maxSpeed; // 20 is good for inddors 254 for outdoors
 
 	export let ls = 0;
 	export let rs = 0;
+	export let speedMultiplier = 1;
 
-	function tanCurve(x: number) {
+	function speedResolutionWithCorrection() {
+		// corrects the speed resolution to be more accurate at low speeds
+		const scaleCorrection = maxSpeed * controllerDeadPoint * Math.PI;
+		return maxSpeed + scaleCorrection;
+	}
+
+	function tanCurveStick(x: number) {
 		if (x < controllerDeadPoint && x > -controllerDeadPoint) return 0;
-		// subtract deadpoint from x
 		x = x > 0 ? x - controllerDeadPoint : x + controllerDeadPoint;
 
-		return Math.floor((Math.tan(x) / (Math.PI / 2)) * (speedResolution + scaleCorrection));
+		return Math.floor((Math.tan(x) / (Math.PI / 2)) * speedResolutionWithCorrection());
+	}
+	//TODO fix speed boost on trigger
+	function tanCurveTrigger(x: number) {
+		if (x < controllerDeadPoint && x > -controllerDeadPoint) return 0;
+		x = x > 0 ? x - controllerDeadPoint : x + controllerDeadPoint;
+		const addedTriggerSpeedScale = absoluteMaxSpeed - maxSpeed;
+
+		return 1 + Math.floor((Math.tan(x) / (Math.PI / 2)) * addedTriggerSpeedScale);
 	}
 
 	const boundCommands = {
@@ -38,7 +52,7 @@
 		let rx = axisMap.lx * 10;
 		let ry = axisMap.ly * 10;
 		let z = 1 - buttonMap.lstick * 0.05;
-		ls = tanCurve(axisMap.ly) * -1;
+		ls = tanCurveStick(axisMap.ly) * -1;
 		return `translateX(${x}%) translateY(${y}%) rotateY(${rx}deg) rotateX(${ry}deg) scale(${z})`;
 	};
 
@@ -48,13 +62,16 @@
 		let rx = axisMap.rx * 10;
 		let ry = axisMap.ry * 10;
 		let z = 1 - buttonMap.rstick * 0.05;
-		rs = tanCurve(axisMap.rx);
+		rs = tanCurveStick(axisMap.rx);
 		return `translateX(${x}%) translateY(${y}%) rotateY(${rx}deg) rotateX(${ry}deg) scale(${z})`;
 	};
 
 	$: trigger = (side: 'rt' | 'lt') => {
 		let s = buttonMap[side];
 		let sx = side === 'rt' ? -s : s;
+
+		speedMultiplier = tanCurveTrigger(s);
+
 		return `
 			transform: scaleX(${sx}) scaleY(${s}) rotate(-69deg);
 			opacity: ${0.3 + s};
