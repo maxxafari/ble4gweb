@@ -13,9 +13,6 @@
 		// add stearing correction to motor speed
 		let lSpeed = ls + rs;
 		let rSpeed = ls - rs;
-		// add speed multiplier
-		lSpeed *= speedMultiplier;
-		rSpeed *= speedMultiplier;
 		// TODO fix backward stearing
 		if (lSpeed > absoluteMaxSpeed) lSpeed = absoluteMaxSpeed;
 		if (rSpeed > absoluteMaxSpeed) rSpeed = absoluteMaxSpeed;

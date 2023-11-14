@@ -31,11 +31,18 @@ const throttleSendCommand = (valueToSend: ArrayBufferLike) => {
 export function bindStearingToBle() {
 	return stearingStore.subscribe((stearing) => {
 		// if (stearingStoreUnsubscribe) stearingStoreUnsubscribe(); this doent work...
+		const { lm, rm } = stearing;
 		if (!device.isConnected()) {
-			console.warn('command not sent, BLE not connected', stearing);
+			console.warn('command not sent, BLE not connected', { lm, rm });
 			return;
 		}
-		const { lm, rm } = stearing;
+		/* uint8array
+			X = 'command identifier
+			L = left speed
+			R = right speed
+			l = left direction
+			r = right direction
+		*/
 		const uint8array = new TextEncoder().encode('X' + 'L' + 'R' + 'l' + 'r'); // placehoders fol values
 		uint8array[1] = Math.abs(lm); // left speed
 		uint8array[2] = Math.abs(rm); // right speed

@@ -7,31 +7,37 @@
 
 	let poll: number = 0;
 	let gamePadConnected = false;
-	let maxSpeed = $btnStore.maxSpeed; // 20 is good for inddors 254 for outdoors
+	let maxSpeed = $btnStore.maxSpeed; // 20 is good for indoors 254 for outdoors
 
 	export let ls = 0;
 	export let rs = 0;
-	export let speedMultiplier = 1;
+
+	let extraMaxSpeed = 0;
+
+	function withinDeadPoint(x: number) {
+		return x < controllerDeadPoint && x > -controllerDeadPoint ? true : false;
+	}
+	function tanCurve(x: number) {
+		return Math.tan(x) / (Math.PI / 2);
+	}
 
 	function speedResolutionWithCorrection() {
 		// corrects the speed resolution to be more accurate at low speeds
-		const scaleCorrection = maxSpeed * controllerDeadPoint * Math.PI;
-		return maxSpeed + scaleCorrection;
+		//FIX THIS:  goes over top speed
+		const topSpeed = maxSpeed + extraMaxSpeed;
+		const scaleCorrection = topSpeed * controllerDeadPoint * Math.PI;
+		return Math.floor(topSpeed + scaleCorrection);
 	}
 
-	function tanCurveStick(x: number) {
-		if (x < controllerDeadPoint && x > -controllerDeadPoint) return 0;
-		x = x > 0 ? x - controllerDeadPoint : x + controllerDeadPoint;
+	function stickInputTranslation(x: number) {
+		if (withinDeadPoint(x)) return 0;
 
-		return Math.floor((Math.tan(x) / (Math.PI / 2)) * speedResolutionWithCorrection());
+		return Math.floor(tanCurve(x) * speedResolutionWithCorrection());
 	}
-	//TODO fix speed boost on trigger
-	function tanCurveTrigger(x: number) {
-		if (x < controllerDeadPoint && x > -controllerDeadPoint) return 0;
-		x = x > 0 ? x - controllerDeadPoint : x + controllerDeadPoint;
+	function triggerTranslation(x: number, speed: number) {
+		if (withinDeadPoint(x)) return 0;
 		const addedTriggerSpeedScale = absoluteMaxSpeed - maxSpeed;
-
-		return 1 + Math.floor((Math.tan(x) / (Math.PI / 2)) * addedTriggerSpeedScale);
+		return Math.floor(tanCurve(x) * addedTriggerSpeedScale);
 	}
 
 	const boundCommands = {
@@ -40,10 +46,10 @@
 		},
 		x: () => {
 			btnPress('lights', true);
-		},
-		lt: () => {
-			btnPress('speedMode', true);
 		}
+		// lt: () => {
+		// 	btnPress('speedMode', true);
+		// }
 	};
 
 	$: stickl = () => {
@@ -52,7 +58,8 @@
 		let rx = axisMap.lx * 10;
 		let ry = axisMap.ly * 10;
 		let z = 1 - buttonMap.lstick * 0.05;
-		ls = tanCurveStick(axisMap.ly) * -1;
+		ls = stickInputTranslation(axisMap.ly) * -1;
+		rs = stickInputTranslation(axisMap.lx);
 		return `translateX(${x}%) translateY(${y}%) rotateY(${rx}deg) rotateX(${ry}deg) scale(${z})`;
 	};
 
@@ -62,7 +69,6 @@
 		let rx = axisMap.rx * 10;
 		let ry = axisMap.ry * 10;
 		let z = 1 - buttonMap.rstick * 0.05;
-		rs = tanCurveStick(axisMap.rx);
 		return `translateX(${x}%) translateY(${y}%) rotateY(${rx}deg) rotateX(${ry}deg) scale(${z})`;
 	};
 
@@ -70,8 +76,7 @@
 		let s = buttonMap[side];
 		let sx = side === 'rt' ? -s : s;
 
-		speedMultiplier = tanCurveTrigger(s);
-
+		extraMaxSpeed = triggerTranslation(buttonMap['lt'], ls);
 		return `
 			transform: scaleX(${sx}) scaleY(${s}) rotate(-69deg);
 			opacity: ${0.3 + s};
@@ -189,7 +194,14 @@
 		<div>{axisMap.rx}</div>
 	</div>
 {/if}
-
+<div class="vals">
+	<div>ls:{ls}</div>
+	<div>rs:{rs}</div>
+</div>
+<div class="vals">
+	<div>x:</div>
+	<div>extraMaxSpeed:{extraMaxSpeed}</div>
+</div>
 <section class="controller" class:connected={gamePadConnected}>
 	<div class="pad" />
 	<div class="well left">
