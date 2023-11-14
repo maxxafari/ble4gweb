@@ -51,7 +51,7 @@ TODO:
 ## controller & car related
 
 - use right stick to set diff between left and right motor speed for stearing and use left stick to set speed ✅
-- add speed modes
+- add speed modes ✅ ...increase max speed with trigger
 - fix backwards stearing reversed
 
 ## pper 2 peer related
